@@ -1270,6 +1270,13 @@ declare namespace API {
       relayServerUrl?: string;
       allowedOrigin?: string;
     };
+    serverManagement: {
+      url: string;
+      tokenConfigured: boolean;
+      usingDefaultSecret: boolean;
+      nodeId: string;
+      nodeName: string;
+    };
     passwordChanged: boolean;
     warnings: SetupCompletionWarning[];
   };
