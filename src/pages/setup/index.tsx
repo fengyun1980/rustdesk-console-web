@@ -1,11 +1,11 @@
-import { ServerOutlined } from '@ant-design/icons';
+import { CloudServerOutlined } from '@ant-design/icons';
 import {
   FormattedMessage,
   Helmet,
   history,
   useIntl,
 } from '@umijs/max';
-import { Alert, App, Button, Card, Form, Input, Password, Space, Typography } from 'antd';
+import { Alert, Button, Card, Divider, Form, Input, message, Space, Typography } from 'antd';
 import React, { useState } from 'react';
 import { completeSetup } from '@/services/rustdesk-console/settings';
 import { removeToken } from '@/utils/auth';
@@ -20,7 +20,6 @@ type FormValues = {
 
 const Setup: React.FC = () => {
   const intl = useIntl();
-  const { message } = App.useApp();
   const [form] = Form.useForm<FormValues>();
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState<API.CompleteSetupResult | null>(null);
@@ -89,7 +88,7 @@ const Setup: React.FC = () => {
         style={{ maxWidth: 520, width: 'calc(100% - 32px)' }}
         title={
           <Space size={8}>
-            <ServerOutlined />
+            <CloudServerOutlined />
             <FormattedMessage id="pages.setup.title" defaultMessage="RustDesk Console — Initial Setup" />
           </Space>
         }
@@ -160,12 +159,12 @@ const Setup: React.FC = () => {
             />
           </Form.Item>
 
-          <Typography.Divider orientation="left">
+          <Divider>
             <FormattedMessage
               id="pages.setup.passwordSection"
               defaultMessage="Admin password (optional)"
             />
-          </Typography.Divider>
+          </Divider>
           <Typography.Paragraph type="secondary" style={{ marginTop: -8 }}>
             <FormattedMessage
               id="pages.setup.passwordHelp"
@@ -177,7 +176,7 @@ const Setup: React.FC = () => {
             label={intl.formatMessage({ id: 'pages.setup.currentPassword', defaultMessage: 'Current password' })}
             name="currentAdminPassword"
           >
-            <Password disabled={submitting} autoComplete="current-password" />
+            <Input.Password disabled={submitting} autoComplete="current-password" />
           </Form.Item>
 
           <Form.Item
@@ -197,7 +196,7 @@ const Setup: React.FC = () => {
               }),
             ]}
           >
-            <Password disabled={submitting} autoComplete="new-password" />
+            <Input.Password disabled={submitting} autoComplete="new-password" />
           </Form.Item>
 
           <Form.Item
@@ -218,7 +217,7 @@ const Setup: React.FC = () => {
               }),
             ]}
           >
-            <Password disabled={submitting} autoComplete="new-password" />
+            <Input.Password disabled={submitting} autoComplete="new-password" />
           </Form.Item>
 
           <Form.Item style={{ marginTop: 24 }}>
@@ -261,7 +260,7 @@ const SetupResultView: React.FC<{
         style={{ maxWidth: 560, width: 'calc(100% - 32px)' }}
         title={
           <Space size={8}>
-            <ServerOutlined />
+            <CloudServerOutlined />
             <FormattedMessage id="pages.setup.result.title" defaultMessage="Setup complete" />
           </Space>
         }
