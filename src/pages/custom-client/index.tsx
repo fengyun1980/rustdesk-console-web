@@ -229,8 +229,8 @@ const CustomClientPage: React.FC = () => {
         setPendingBuildConfig(values);
         setPageState('repoRequired');
       } else if (
-        error?.data?.message?.includes('in progress') ||
-        error?.data?.message?.includes('ongoing') ||
+        error?.response?.data?.message?.includes('in progress') ||
+        error?.response?.data?.message?.includes('ongoing') ||
         error?.response?.status === 409
       ) {
         msgApi.error(
@@ -241,10 +241,11 @@ const CustomClientPage: React.FC = () => {
         );
       } else {
         msgApi.error(
-          intl.formatMessage({
-            id: 'pages.nexus.generateFailed',
-            defaultMessage: 'Failed to submit build request',
-          }),
+          error?.response?.data?.message ||
+            intl.formatMessage({
+              id: 'pages.nexus.generateFailed',
+              defaultMessage: 'Failed to submit build request',
+            }),
         );
       }
     } finally {
