@@ -13,9 +13,9 @@ import { removeToken } from '@/utils/auth';
 type FormValues = {
   serverUrl: string;
   serverPublicKey?: string;
-  currentAdminPassword?: string;
-  newAdminPassword?: string;
-  confirmNewAdminPassword?: string;
+  adminUsername: string;
+  adminPassword: string;
+  confirmAdminPassword: string;
 };
 
 const Setup: React.FC = () => {
@@ -31,14 +31,12 @@ const Setup: React.FC = () => {
     try {
       const payload: API.CompleteSetupParams = {
         serverUrl: values.serverUrl.trim(),
+        adminUsername: values.adminUsername.trim(),
+        adminPassword: values.adminPassword,
         ...(values.serverPublicKey
           ? { serverPublicKey: values.serverPublicKey.trim() }
           : {}),
       };
-      if (values.currentAdminPassword && values.newAdminPassword) {
-        payload.currentAdminPassword = values.currentAdminPassword;
-        payload.newAdminPassword = values.newAdminPassword;
-      }
       const res = await completeSetup(payload);
       setResult(res);
       message.success(
@@ -96,7 +94,7 @@ const Setup: React.FC = () => {
         <Typography.Paragraph type="secondary">
           <FormattedMessage
             id="pages.setup.intro"
-            defaultMessage="Enter your server address below. It will be used for the console front-end, web client (remote control), and custom-client builds."
+            defaultMessage="Enter your server address and admin credentials below. The server address will be used for the console front-end, web client (remote control), and custom-client builds."
           />
         </Typography.Paragraph>
 
@@ -161,55 +159,59 @@ const Setup: React.FC = () => {
 
           <Divider>
             <FormattedMessage
-              id="pages.setup.passwordSection"
-              defaultMessage="Admin password (optional)"
+              id="pages.setup.adminSection"
+              defaultMessage="Admin credentials"
             />
           </Divider>
           <Typography.Paragraph type="secondary" style={{ marginTop: -8 }}>
             <FormattedMessage
-              id="pages.setup.passwordHelp"
-              defaultMessage="Change the built-in admin password now. Leave blank to keep the existing one."
+              id="pages.setup.adminHelp"
+              defaultMessage="Set the administrator username and password for this installation."
             />
           </Typography.Paragraph>
 
           <Form.Item
-            label={intl.formatMessage({ id: 'pages.setup.currentPassword', defaultMessage: 'Current password' })}
-            name="currentAdminPassword"
+            label={intl.formatMessage({ id: 'pages.setup.adminUsername.label', defaultMessage: 'Admin username' })}
+            name="adminUsername"
+            rules={[
+              { required: true, message: intl.formatMessage({ id: 'pages.setup.adminUsername.required', defaultMessage: 'Please enter an admin username' }) },
+              { min: 2, message: intl.formatMessage({ id: 'pages.setup.adminUsername.min', defaultMessage: 'At least 2 characters' }) },
+              {
+                pattern: /^[A-Za-z0-9_.@-]+$/,
+                message: intl.formatMessage({ id: 'pages.setup.adminUsername.invalid', defaultMessage: 'Letters, numbers, dots, underscores, hyphens and @ only' }),
+              },
+            ]}
           >
-            <Input.Password disabled={submitting} autoComplete="current-password" />
+            <Input
+              autoComplete="username"
+              disabled={submitting}
+              placeholder="admin"
+            />
           </Form.Item>
 
           <Form.Item
-            label={intl.formatMessage({ id: 'pages.setup.newPassword', defaultMessage: 'New password' })}
-            name="newAdminPassword"
-            dependencies={['currentAdminPassword']}
+            label={intl.formatMessage({ id: 'pages.setup.adminPassword.label', defaultMessage: 'Admin password' })}
+            name="adminPassword"
+            dependencies={['adminUsername']}
             rules={[
-              ({ getFieldValue }) => ({
-                validator(_, value) {
-                  if (getFieldValue('currentAdminPassword') && (!value || value.length < 6)) {
-                    return Promise.reject(new Error(
-                      intl.formatMessage({ id: 'pages.setup.newPassword.min', defaultMessage: 'At least 6 characters' }),
-                    ));
-                  }
-                  return Promise.resolve();
-                },
-              }),
+              { required: true, message: intl.formatMessage({ id: 'pages.setup.adminPassword.required', defaultMessage: 'Please enter a password' }) },
+              { min: 6, message: intl.formatMessage({ id: 'pages.setup.adminPassword.min', defaultMessage: 'At least 6 characters' }) },
             ]}
           >
             <Input.Password disabled={submitting} autoComplete="new-password" />
           </Form.Item>
 
           <Form.Item
-            label={intl.formatMessage({ id: 'pages.setup.confirmPassword', defaultMessage: 'Confirm new password' })}
-            name="confirmNewAdminPassword"
-            dependencies={['newAdminPassword']}
+            label={intl.formatMessage({ id: 'pages.setup.confirmAdminPassword.label', defaultMessage: 'Confirm admin password' })}
+            name="confirmAdminPassword"
+            dependencies={['adminPassword']}
             rules={[
+              { required: true, message: intl.formatMessage({ id: 'pages.setup.confirmAdminPassword.required', defaultMessage: 'Please confirm your password' }) },
               ({ getFieldValue }) => ({
                 validator(_, value) {
-                  const newPw = getFieldValue('newAdminPassword');
-                  if (newPw && value !== newPw) {
+                  if (!value || getFieldValue('adminPassword') !== value) {
                     return Promise.reject(new Error(
-                      intl.formatMessage({ id: 'pages.setup.confirmPassword.mismatch', defaultMessage: 'Passwords do not match' }),
+                      intl.formatMessage({ id: 'pages.setup.confirmAdminPassword.mismatch', defaultMessage: 'Passwords do not match' }),
                     ));
                   }
                   return Promise.resolve();
@@ -272,6 +274,7 @@ const SetupResultView: React.FC<{
             { id: 'pages.setup.result.done', defaultMessage: 'Server address saved: {origin}' },
             { origin: result.origin },
           )}
+          description={intl.formatMessage({ id: 'pages.setup.result.adminSet', defaultMessage: 'Admin credentials configured.' })}
           style={{ marginBottom: 16 }}
         />
 
