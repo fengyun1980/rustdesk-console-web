@@ -1251,8 +1251,8 @@ declare namespace API {
   type CompleteSetupParams = {
     serverUrl: string;
     serverPublicKey?: string;
-    currentAdminPassword?: string;
-    newAdminPassword?: string;
+    adminUsername: string;
+    adminPassword: string;
   };
 
   type SetupCompletionWarning = {
