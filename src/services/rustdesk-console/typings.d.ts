@@ -1315,4 +1315,36 @@ declare namespace API {
     generatorRef?: string;
     regenerateSigningKey?: boolean;
   };
+
+  // ── Setup Wizard ────────────────────────────────────────────────
+
+  type SetupStatus = {
+    completed: boolean;
+  };
+
+  type CompleteSetupParams = {
+    serverUrl: string;
+    serverPublicKey?: string;
+    currentAdminPassword?: string;
+    newAdminPassword?: string;
+  };
+
+  type SetupCompletionWarning = {
+    code: string;
+    message: string;
+  };
+
+  type CompleteSetupResult = {
+    completed: true;
+    origin: string;
+    webClient: {
+      eligible: boolean;
+      enabled: boolean;
+      idServerUrl?: string;
+      relayServerUrl?: string;
+      allowedOrigin?: string;
+    };
+    passwordChanged: boolean;
+    warnings: SetupCompletionWarning[];
+  };
 }

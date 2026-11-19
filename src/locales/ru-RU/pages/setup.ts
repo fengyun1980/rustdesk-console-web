@@ -1,0 +1,40 @@
+export default {
+  'pages.setup.title': 'RustDesk Console — Первоначальная настройка',
+  'pages.setup.intro':
+    'Введите адрес сервера ниже. Он используется интерфейсом консоли, веб-клиентом (удалённое управление) и сборками кастомного клиента.',
+  'pages.setup.serverUrl.label': 'Адрес сервера',
+  'pages.setup.serverUrl.required': 'Пожалуйста, введите адрес сервера',
+  'pages.setup.serverUrl.invalid': 'Используйте http:// или https://, без пути, запросов и пробелов',
+  'pages.setup.serverUrl.help': 'Пример: https://console.example.com',
+  'pages.setup.serverPublicKey.label': 'Публичный ключ сервера (необязательно)',
+  'pages.setup.serverPublicKey.help':
+    'Публичный ключ Ed25519 из Server Pro hbbs (id_ed25519.pub). Вставьте, чтобы автоматически включить веб-клиент; это можно сделать и позже.',
+  'pages.setup.passwordSection': 'Пароль администратора (необязательно)',
+  'pages.setup.passwordHelp': 'Смените встроенный пароль admin сейчас. Оставьте пустым, чтобы сохранить текущий.',
+  'pages.setup.currentPassword': 'Текущий пароль',
+  'pages.setup.newPassword': 'Новый пароль',
+  'pages.setup.newPassword.min': 'Минимум 6 символов',
+  'pages.setup.confirmPassword': 'Подтвердите новый пароль',
+  'pages.setup.confirmPassword.mismatch': 'Пароли не совпадают',
+  'pages.setup.submit': 'Сохранить и продолжить',
+  'pages.setup.success': 'Настройка успешно сохранена',
+  'pages.setup.submitFailed': 'Не удалось сохранить настройки',
+  'pages.setup.result.title': 'Настройка завершена',
+  'pages.setup.result.done': 'Адрес сервера сохранён: {origin}',
+  'pages.setup.result.webClient': 'Веб-клиент (удалённое управление):',
+  'pages.setup.result.enabled': 'Включён',
+  'pages.setup.result.disabled': 'Адрес задан, нужен публичный ключ',
+  'pages.setup.result.skipped': 'Пропущено (нужен HTTPS)',
+  'pages.setup.result.idServer': 'ID-сервер:',
+  'pages.setup.result.relayServer': 'Сервер ретрансляции:',
+  'pages.setup.result.allowedOrigin': 'Разрешённый источник:',
+  'pages.setup.result.warnings': 'Обратите внимание',
+  'pages.setup.result.nextTitle': 'Следующие шаги',
+  'pages.setup.result.next.hbbsRelay':
+    'Убедитесь, что Server Pro hbbs relay-servers совпадает с этим адресом.',
+  'pages.setup.result.next.webClientKey':
+    'Если веб-клиент всё ещё отключён, вставьте Server Pro hbbs id_ed25519.pub в Настройки → Веб-клиент.',
+  'pages.setup.result.next.publicDomain':
+    'Доступ к консоли через публичный домен (не localhost).',
+  'pages.setup.result.goLogin': 'Перейти к входу',
+};

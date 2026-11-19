@@ -1,0 +1,40 @@
+export default {
+  'pages.setup.title': 'RustDesk Console — Configuração Inicial',
+  'pages.setup.intro':
+    'Digite o endereço do servidor abaixo. Ele é usado pelo front-end do console, cliente web (controle remoto) e builds de cliente personalizado.',
+  'pages.setup.serverUrl.label': 'Endereço do servidor',
+  'pages.setup.serverUrl.required': 'Informe o endereço do servidor',
+  'pages.setup.serverUrl.invalid': 'Use http:// ou https://, sem caminho, consulta ou espaços',
+  'pages.setup.serverUrl.help': 'Exemplo: https://console.example.com',
+  'pages.setup.serverPublicKey.label': 'Chave pública do servidor (opcional)',
+  'pages.setup.serverPublicKey.help':
+    'Chave pública Ed25519 do Server Pro hbbs (id_ed25519.pub). Cole para habilitar automaticamente o cliente web; também pode fazer isso depois.',
+  'pages.setup.passwordSection': 'Senha do admin (opcional)',
+  'pages.setup.passwordHelp': 'Altere a senha do admin agora. Deixe em branco para manter a atual.',
+  'pages.setup.currentPassword': 'Senha atual',
+  'pages.setup.newPassword': 'Nova senha',
+  'pages.setup.newPassword.min': 'Pelo menos 6 caracteres',
+  'pages.setup.confirmPassword': 'Confirmar nova senha',
+  'pages.setup.confirmPassword.mismatch': 'As senhas não coincidem',
+  'pages.setup.submit': 'Salvar e continuar',
+  'pages.setup.success': 'Configuração salva com sucesso',
+  'pages.setup.submitFailed': 'Falha ao salvar as configurações',
+  'pages.setup.result.title': 'Configuração concluída',
+  'pages.setup.result.done': 'Endereço do servidor salvo: {origin}',
+  'pages.setup.result.webClient': 'Cliente web (controle remoto):',
+  'pages.setup.result.enabled': 'Habilitado',
+  'pages.setup.result.disabled': 'Endereço definido, falta a chave pública',
+  'pages.setup.result.skipped': 'Pulado (requer HTTPS)',
+  'pages.setup.result.idServer': 'Servidor ID:',
+  'pages.setup.result.relayServer': 'Servidor de relay:',
+  'pages.setup.result.allowedOrigin': 'Origem permitida:',
+  'pages.setup.result.warnings': 'Observações',
+  'pages.setup.result.nextTitle': 'Próximos passos',
+  'pages.setup.result.next.hbbsRelay':
+    'Verifique se o Server Pro hbbs relay-servers bate com este endereço.',
+  'pages.setup.result.next.webClientKey':
+    'Se o cliente web ainda estiver desabilitado, cole Server Pro hbbs id_ed25519.pub em Configurações → Cliente Web.',
+  'pages.setup.result.next.publicDomain':
+    'Acesse o console através de um domínio público (não localhost).',
+  'pages.setup.result.goLogin': 'Ir para login',
+};
