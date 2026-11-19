@@ -1244,4 +1244,43 @@ export default {
     '通过 GitHub 身份验证，我们可以确认您是真实用户，从而防止构建资源被自动化滥用。我们仅获取您的公开信息——不会请求访问您的仓库、个人数据或任何其他权限。',
   'pages.nexus.repoWhyInteract':
     '我是一名高中生，利用课余时间开发这个项目。您的 Star、Fork 或 Watch 对我意义重大——这不仅是对我持续开发的鼓励，也有助于我的大学申请。这是我所请求的唯一回报。非常感谢您的支持！',
+
+  // ── Setup Wizard ──
+  'pages.setup.title': 'RustDesk Console — 首次配置',
+  'pages.setup.intro':
+    '请在下方填写您的服务器地址。它将用于控制台前端、网页远控和定制客户端构建。',
+  'pages.setup.serverUrl.label': '服务器地址',
+  'pages.setup.serverUrl.required': '请填写服务器地址',
+  'pages.setup.serverUrl.invalid': '使用 http:// 或 https://，无需路径、查询或空格',
+  'pages.setup.serverUrl.help': '示例：https://console.example.com',
+  'pages.setup.serverPublicKey.label': '服务器公钥（可选）',
+  'pages.setup.serverPublicKey.help':
+    'Server Pro hbbs 的 Ed25519 公钥（id_ed25519.pub）。填入可自动启用网页远控；也可稍后在设置中配置。',
+  'pages.setup.passwordSection': '管理员密码（可选）',
+  'pages.setup.passwordHelp': '现在修改内置 admin 密码。留空则保持原有密码不变。',
+  'pages.setup.currentPassword': '当前密码',
+  'pages.setup.newPassword': '新密码',
+  'pages.setup.newPassword.min': '至少 6 个字符',
+  'pages.setup.confirmPassword': '确认新密码',
+  'pages.setup.confirmPassword.mismatch': '两次输入的密码不一致',
+  'pages.setup.submit': '保存并继续',
+  'pages.setup.success': '配置已保存',
+  'pages.setup.submitFailed': '保存设置失败',
+  'pages.setup.result.title': '配置完成',
+  'pages.setup.result.done': '服务器地址已保存：{origin}',
+  'pages.setup.result.webClient': '网页远控状态：',
+  'pages.setup.result.enabled': '已启用',
+  'pages.setup.result.disabled': '地址已设置，待填写公钥',
+  'pages.setup.result.skipped': '已跳过（需要 HTTPS）',
+  'pages.setup.result.idServer': 'ID 服务器：',
+  'pages.setup.result.relayServer': '中继服务器：',
+  'pages.setup.result.allowedOrigin': '允许的来源：',
+  'pages.setup.result.warnings': '请注意',
+  'pages.setup.result.nextTitle': '后续步骤',
+  'pages.setup.result.next.hbbsRelay':
+    '确保 Server Pro 的 hbbs relay-servers 配置与此地址一致。',
+  'pages.setup.result.next.webClientKey':
+    '如果网页远控仍未启用，请将 Server Pro hbbs id_ed25519.pub 粘贴到“设置 → 网页客户端”。',
+  'pages.setup.result.next.publicDomain': '通过公网域名访问控制台（不要用 localhost）。',
+  'pages.setup.result.goLogin': '前往登录',
 };

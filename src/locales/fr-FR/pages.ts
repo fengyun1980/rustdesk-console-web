@@ -1486,4 +1486,44 @@ export default {
   'pages.users.searchStrategyPlaceholder': 'Rechercher par stratégie',
   'pages.users.searchUserGroupPlaceholder':
     "Rechercher par groupe d'utilisateurs",
+
+  // ── Setup Wizard ──
+  'pages.setup.title': 'RustDesk Console — Configuration initiale',
+  'pages.setup.intro':
+    'Entrez l’adresse de votre serveur ci-dessous. Elle est utilisée par le front-end de la console, le client web (contrôle à distance) et les builds de client personnalisé.',
+  'pages.setup.serverUrl.label': 'Adresse du serveur',
+  'pages.setup.serverUrl.required': 'Veuillez entrer l’adresse du serveur',
+  'pages.setup.serverUrl.invalid': 'Utilisez http:// ou https://, sans chemin, paramètres ou espaces',
+  'pages.setup.serverUrl.help': 'Exemple : https://console.example.com',
+  'pages.setup.serverPublicKey.label': 'Clé publique du serveur (facultatif)',
+  'pages.setup.serverPublicKey.help':
+    'Clé publique Ed25519 du Server Pro hbbs (id_ed25519.pub). Collez-la pour activer automatiquement le client web ; vous pouvez le faire plus tard.',
+  'pages.setup.passwordSection': 'Mot de passe admin (facultatif)',
+  'pages.setup.passwordHelp': 'Changez le mot de passe admin intégré maintenant. Laissez vide pour conserver l’actuel.',
+  'pages.setup.currentPassword': 'Mot de passe actuel',
+  'pages.setup.newPassword': 'Nouveau mot de passe',
+  'pages.setup.newPassword.min': 'Au moins 6 caractères',
+  'pages.setup.confirmPassword': 'Confirmer le nouveau mot de passe',
+  'pages.setup.confirmPassword.mismatch': 'Les mots de passe ne correspondent pas',
+  'pages.setup.submit': 'Enregistrer et continuer',
+  'pages.setup.success': 'Configuration enregistrée',
+  'pages.setup.submitFailed': 'Échec de l’enregistrement',
+  'pages.setup.result.title': 'Configuration terminée',
+  'pages.setup.result.done': 'Adresse du serveur enregistrée : {origin}',
+  'pages.setup.result.webClient': 'Client web (contrôle à distance) :',
+  'pages.setup.result.enabled': 'Activé',
+  'pages.setup.result.disabled': 'Adresse définie, clé publique requise',
+  'pages.setup.result.skipped': 'Ignoré (HTTPS requis)',
+  'pages.setup.result.idServer': 'Serveur ID :',
+  'pages.setup.result.relayServer': 'Serveur de relais :',
+  'pages.setup.result.allowedOrigin': 'Origine autorisée :',
+  'pages.setup.result.warnings': 'À noter',
+  'pages.setup.result.nextTitle': 'Étapes suivantes',
+  'pages.setup.result.next.hbbsRelay':
+    'Vérifiez que Server Pro hbbs relay-servers correspond à cette adresse.',
+  'pages.setup.result.next.webClientKey':
+    'Si le client web est toujours désactivé, collez Server Pro hbbs id_ed25519.pub dans Paramètres → Client web.',
+  'pages.setup.result.next.publicDomain':
+    'Accédez à la console via un domaine public (pas localhost).',
+  'pages.setup.result.goLogin': 'Aller à la connexion',
 };
