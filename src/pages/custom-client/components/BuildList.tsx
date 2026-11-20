@@ -2,7 +2,6 @@ import {
   CheckCircleOutlined,
   CloudDownloadOutlined,
   DeleteOutlined,
-  GithubOutlined,
   LoadingOutlined,
   PlusOutlined,
   RedoOutlined,
@@ -17,16 +16,13 @@ import {
   deleteBuild,
   downloadBuildFile,
   getBuildList,
-} from '@/services/rustdesk-console/nexus';
+} from '@/services/rustdesk-console/custom-client';
 
-const { Text, Title } = Typography;
+const { Title } = Typography;
 
 interface BuildListProps {
   actionRef: React.MutableRefObject<ActionType | null>;
-  bindStatus: API.NexusBindStatus | null;
-  onUnbind: () => void;
   onCreate: () => void;
-  onRepoRequired: () => void;
   onRetry: (record: API.BuildRecord) => void;
 }
 
@@ -40,10 +36,7 @@ const statusConfig: Record<string, { color: string; icon: React.ReactNode }> = {
 
 const BuildList: React.FC<BuildListProps> = ({
   actionRef,
-  bindStatus,
-  onUnbind,
   onCreate,
-  onRepoRequired,
   onRetry,
 }) => {
   const intl = useIntl();
@@ -56,23 +49,23 @@ const BuildList: React.FC<BuildListProps> = ({
   const statusLabel = (status: string) => {
     const map: Record<string, string> = {
       pending: intl.formatMessage({
-        id: 'pages.nexus.statusPending',
+        id: 'pages.customClient.statusPending',
         defaultMessage: 'Build Pending',
       }),
       building: intl.formatMessage({
-        id: 'pages.nexus.statusBuilding',
+        id: 'pages.customClient.statusBuilding',
         defaultMessage: 'Building',
       }),
       completed: intl.formatMessage({
-        id: 'pages.nexus.statusCompleted',
+        id: 'pages.customClient.statusCompleted',
         defaultMessage: 'Build Completed',
       }),
       failed: intl.formatMessage({
-        id: 'pages.nexus.statusFailed',
+        id: 'pages.customClient.statusFailed',
         defaultMessage: 'Build Failed',
       }),
       cancelled: intl.formatMessage({
-        id: 'pages.nexus.statusCancelled',
+        id: 'pages.customClient.statusCancelled',
         defaultMessage: 'Build Cancelled',
       }),
     };
@@ -104,7 +97,7 @@ const BuildList: React.FC<BuildListProps> = ({
       await deleteBuild(uuid);
       msgApi.success(
         intl.formatMessage({
-          id: 'pages.nexus.deleteSuccess',
+          id: 'pages.customClient.deleteSuccess',
           defaultMessage: 'Build record deleted',
         }),
       );
@@ -112,7 +105,7 @@ const BuildList: React.FC<BuildListProps> = ({
     } catch {
       msgApi.error(
         intl.formatMessage({
-          id: 'pages.nexus.deleteFailed',
+          id: 'pages.customClient.deleteFailed',
           defaultMessage: 'Failed to delete build record',
         }),
       );
@@ -134,7 +127,7 @@ const BuildList: React.FC<BuildListProps> = ({
     } catch {
       msgApi.error(
         intl.formatMessage({
-          id: 'pages.nexus.downloadFailed',
+          id: 'pages.customClient.downloadFailed',
           defaultMessage: 'Failed to download custom client',
         }),
       );
@@ -150,7 +143,7 @@ const BuildList: React.FC<BuildListProps> = ({
   const columns: ProColumns<API.BuildRecord>[] = [
     {
       title: intl.formatMessage({
-        id: 'pages.nexus.uuid',
+        id: 'pages.customClient.uuid',
         defaultMessage: 'UUID',
       }),
       dataIndex: 'uuid',
@@ -159,7 +152,7 @@ const BuildList: React.FC<BuildListProps> = ({
     },
     {
       title: intl.formatMessage({
-        id: 'pages.nexus.appName',
+        id: 'pages.customClient.appName',
         defaultMessage: 'Application Name',
       }),
       dataIndex: 'appName',
@@ -168,14 +161,17 @@ const BuildList: React.FC<BuildListProps> = ({
       render: (dom: React.ReactNode) => dom || '-',
     },
     {
-      title: intl.formatMessage({ id: 'pages.nexus.os', defaultMessage: 'OS' }),
+      title: intl.formatMessage({
+        id: 'pages.customClient.os',
+        defaultMessage: 'OS',
+      }),
       dataIndex: 'os',
       key: 'os',
       width: 80,
     },
     {
       title: intl.formatMessage({
-        id: 'pages.nexus.arch',
+        id: 'pages.customClient.arch',
         defaultMessage: 'Arch',
       }),
       dataIndex: 'arch',
@@ -184,7 +180,7 @@ const BuildList: React.FC<BuildListProps> = ({
     },
     {
       title: intl.formatMessage({
-        id: 'pages.nexus.status',
+        id: 'pages.customClient.status',
         defaultMessage: 'Status',
       }),
       dataIndex: 'status',
@@ -238,7 +234,7 @@ const BuildList: React.FC<BuildListProps> = ({
                 onClick={() => onRetry(record)}
               >
                 <FormattedMessage
-                  id="pages.nexus.retryBuild"
+                  id="pages.customClient.retryBuild"
                   defaultMessage="Retry"
                 />
               </Button>
@@ -267,7 +263,7 @@ const BuildList: React.FC<BuildListProps> = ({
               record.status === 'completed') && (
               <Popconfirm
                 title={intl.formatMessage({
-                  id: 'pages.nexus.deleteBuildConfirm',
+                  id: 'pages.customClient.deleteBuildConfirm',
                   defaultMessage:
                     'Are you sure you want to delete this build record?',
                 })}
@@ -303,19 +299,12 @@ const BuildList: React.FC<BuildListProps> = ({
   return (
     <ProTable<API.BuildRecord>
       headerTitle={
-        <Space>
-          <Title level={5} style={{ margin: 0 }}>
-            <FormattedMessage
-              id="pages.nexus.buildList"
-              defaultMessage="Build History"
-            />
-          </Title>
-          {bindStatus?.bound && (
-            <Text type="secondary">
-              <GithubOutlined /> {bindStatus.nexus_username}
-            </Text>
-          )}
-        </Space>
+        <Title level={5} style={{ margin: 0 }}>
+          <FormattedMessage
+            id="pages.customClient.buildList"
+            defaultMessage="Build History"
+          />
+        </Title>
       }
       columnsState={{
         persistenceType: 'localStorage',
@@ -338,9 +327,6 @@ const BuildList: React.FC<BuildListProps> = ({
         reload: true,
       }}
       toolBarRender={() => [
-        <Button key="unbind" size="small" danger onClick={onUnbind}>
-          <FormattedMessage id="pages.nexus.unbind" defaultMessage="Unbind" />
-        </Button>,
         <Button
           key="create"
           type="primary"
@@ -348,7 +334,7 @@ const BuildList: React.FC<BuildListProps> = ({
           onClick={onCreate}
         >
           <FormattedMessage
-            id="pages.nexus.createBuild"
+            id="pages.customClient.createBuild"
             defaultMessage="Create New Client"
           />
         </Button>,
@@ -361,10 +347,7 @@ const BuildList: React.FC<BuildListProps> = ({
             data: records,
             success: true,
           };
-        } catch (error: any) {
-          if (error?.response?.status === 403) {
-            onRepoRequired();
-          }
+        } catch {
           return {
             data: [],
             success: false,

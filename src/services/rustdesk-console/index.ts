@@ -119,17 +119,13 @@ export {
 } from './strategy';
 export { checkUpdate } from './system';
 export {
-  createNexusLogin,
-  pollNexusLoginStatus,
-  getNexusBindStatus,
-  unbindNexus,
   getBuildList,
   submitBuild,
-
   deleteBuild,
-  getBuildFiles,
   downloadBuildFile,
-} from './nexus';
+  getCustomClientSettings,
+  updateCustomClientSettings,
+} from './custom-client';
 export {
   passkeyRegisterBegin,
   passkeyRegisterVerify,

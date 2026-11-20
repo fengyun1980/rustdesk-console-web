@@ -1181,26 +1181,7 @@ declare namespace API {
     }>;
   };
 
-  // ── Nexus ───────────────────────────────────────────────────────
-
-  type NexusLoginResult = {
-    login_id: string;
-    auth_url: string;
-    expires_in: number;
-  };
-
-  type NexusLoginStatus = {
-    state: 'pending' | 'completed' | 'failed';
-    nexus_username?: string;
-    expires_in?: number;
-    error?: string;
-  };
-
-  type NexusBindStatus = {
-    bound: boolean;
-    nexus_username?: string;
-    expired?: boolean;
-  };
+  // ── Custom Client ───────────────────────────────────────────────
 
   type BuildCustomConfig = {
     password?: string;
@@ -1217,15 +1198,14 @@ declare namespace API {
   };
 
   type SubmitBuildParams = {
-    os: 'windows';
-    arch: 'x86_64' | 'aarch64' | 'x86';
-    custom: BuildCustomConfig;
+    os: 'windows' | 'linux' | 'macos' | 'android' | 'ios' | 'all';
+    arch?: 'x86_64' | 'aarch64' | 'x86' | 'armv7' | 'universal';
+    custom?: BuildCustomConfig;
   };
 
   type SubmitBuildResult = {
     uuid: string;
     status: 'pending';
-    message: string;
   };
 
   type BuildRecord = {
@@ -1240,6 +1220,20 @@ declare namespace API {
     message: string | null;
     createdAt: string;
     updatedAt: string;
+  };
+
+  type CustomClientSettings = {
+    githubToken: string;
+    generatorRepo: string;
+    generatorRef: string;
+    signingPublicKey: string;
+  };
+
+  type UpdateCustomClientSettingsParams = {
+    githubToken?: string;
+    generatorRepo?: string;
+    generatorRef?: string;
+    regenerateSigningKey?: boolean;
   };
 
   // ── Setup Wizard ────────────────────────────────────────────────

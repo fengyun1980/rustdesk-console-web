@@ -21,27 +21,27 @@ const { Paragraph } = Typography;
 const DISABLE_FIELDS = [
   {
     name: 'disable-installation',
-    labelKey: 'pages.nexus.disableInstallation',
+    labelKey: 'pages.customClient.disableInstallation',
     defaultMessage: 'Disable Installation',
   },
   {
     name: 'disable-settings',
-    labelKey: 'pages.nexus.disableSettings',
+    labelKey: 'pages.customClient.disableSettings',
     defaultMessage: 'Disable Settings',
   },
   {
     name: 'disable-account',
-    labelKey: 'pages.nexus.disableAccount',
+    labelKey: 'pages.customClient.disableAccount',
     defaultMessage: 'Disable Account',
   },
   {
     name: 'disable-ab',
-    labelKey: 'pages.nexus.disableAb',
+    labelKey: 'pages.customClient.disableAb',
     defaultMessage: 'Disable AB',
   },
   {
     name: 'disable-tcp-listen',
-    labelKey: 'pages.nexus.disableTcpListen',
+    labelKey: 'pages.customClient.disableTcpListen',
     defaultMessage: 'Disable TCP Listen',
   },
 ];
@@ -97,7 +97,7 @@ const CreateBuildModal: React.FC<CreateBuildModalProps> = ({
   return (
     <Modal
       title={intl.formatMessage({
-        id: 'pages.nexus.createBuildTitle',
+        id: 'pages.customClient.createBuildTitle',
         defaultMessage: 'Create Custom Client',
       })}
       open={open}
@@ -122,12 +122,12 @@ const CreateBuildModal: React.FC<CreateBuildModalProps> = ({
         {/* Section: OS & Architecture */}
         <Divider titlePlacement="left" plain>
           <FormattedMessage
-            id="pages.nexus.os"
+            id="pages.customClient.os"
             defaultMessage="Operating System"
           />{' '}
           &{' '}
           <FormattedMessage
-            id="pages.nexus.arch"
+            id="pages.customClient.arch"
             defaultMessage="Architecture"
           />
         </Divider>
@@ -136,7 +136,7 @@ const CreateBuildModal: React.FC<CreateBuildModalProps> = ({
           <Col span={12}>
             <Form.Item
               label={intl.formatMessage({
-                id: 'pages.nexus.os',
+                id: 'pages.customClient.os',
                 defaultMessage: 'Operating System',
               })}
             >
@@ -147,7 +147,7 @@ const CreateBuildModal: React.FC<CreateBuildModalProps> = ({
             <Form.Item
               name="arch"
               label={intl.formatMessage({
-                id: 'pages.nexus.arch',
+                id: 'pages.customClient.arch',
                 defaultMessage: 'Architecture',
               })}
               rules={[{ required: true }]}
@@ -160,14 +160,14 @@ const CreateBuildModal: React.FC<CreateBuildModalProps> = ({
         <Form.Item
           name="app-name"
           label={intl.formatMessage({
-            id: 'pages.nexus.appName',
+            id: 'pages.customClient.appName',
             defaultMessage: 'Application Name',
           })}
           rules={[
             {
               pattern: /^[a-zA-Z]+$/,
               message: intl.formatMessage({
-                id: 'pages.nexus.appNameHint',
+                id: 'pages.customClient.appNameHint',
                 defaultMessage: 'Only English letters allowed',
               }),
             },
@@ -176,7 +176,7 @@ const CreateBuildModal: React.FC<CreateBuildModalProps> = ({
           <Input
             prefix={<AppstoreOutlined />}
             placeholder={intl.formatMessage({
-              id: 'pages.nexus.appNamePlaceholder',
+              id: 'pages.customClient.appNamePlaceholder',
               defaultMessage: 'e.g. my-rustdesk',
             })}
           />
@@ -185,7 +185,7 @@ const CreateBuildModal: React.FC<CreateBuildModalProps> = ({
         {/* Section: Custom Configuration */}
         <Divider titlePlacement="left" plain>
           <FormattedMessage
-            id="pages.nexus.customConfig"
+            id="pages.customClient.customConfig"
             defaultMessage="Custom Configuration"
           />
         </Divider>
@@ -195,13 +195,13 @@ const CreateBuildModal: React.FC<CreateBuildModalProps> = ({
             <Form.Item
               name="password"
               label={intl.formatMessage({
-                id: 'pages.nexus.password',
+                id: 'pages.customClient.password',
                 defaultMessage: 'Password',
               })}
             >
               <Input.Password
                 placeholder={intl.formatMessage({
-                  id: 'pages.nexus.passwordPlaceholder',
+                  id: 'pages.customClient.passwordPlaceholder',
                   defaultMessage: 'Enter password',
                 })}
               />
@@ -211,13 +211,13 @@ const CreateBuildModal: React.FC<CreateBuildModalProps> = ({
             <Form.Item
               name="salt"
               label={intl.formatMessage({
-                id: 'pages.nexus.salt',
+                id: 'pages.customClient.salt',
                 defaultMessage: 'Salt',
               })}
             >
               <Input.Password
                 placeholder={intl.formatMessage({
-                  id: 'pages.nexus.saltPlaceholder',
+                  id: 'pages.customClient.saltPlaceholder',
                   defaultMessage: 'Enter salt',
                 })}
               />
@@ -228,7 +228,7 @@ const CreateBuildModal: React.FC<CreateBuildModalProps> = ({
         <Form.Item
           name="conn-type"
           label={intl.formatMessage({
-            id: 'pages.nexus.connType',
+            id: 'pages.customClient.connType',
             defaultMessage: 'Connection Type',
           })}
         >
@@ -253,7 +253,7 @@ const CreateBuildModal: React.FC<CreateBuildModalProps> = ({
         {/* Section: Server Configuration */}
         <Divider titlePlacement="left" plain>
           <FormattedMessage
-            id="pages.nexus.serverConfig"
+            id="pages.customClient.serverConfig"
             defaultMessage="Server Configuration"
           />
         </Divider>
@@ -286,14 +286,14 @@ const CreateBuildModal: React.FC<CreateBuildModalProps> = ({
                       {
                         value: 'override',
                         label: intl.formatMessage({
-                          id: 'pages.nexus.overrideSettings',
+                          id: 'pages.customClient.overrideSettings',
                           defaultMessage: 'Override',
                         }),
                       },
                       {
                         value: 'default',
                         label: intl.formatMessage({
-                          id: 'pages.nexus.defaultSettings',
+                          id: 'pages.customClient.defaultSettings',
                           defaultMessage: 'Default',
                         }),
                       },
