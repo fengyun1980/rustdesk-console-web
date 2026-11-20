@@ -122,7 +122,6 @@ export {
   getBuildList,
   submitBuild,
   deleteBuild,
-  downloadBuildFile,
   getCustomClientSettings,
   updateCustomClientSettings,
 } from './custom-client';

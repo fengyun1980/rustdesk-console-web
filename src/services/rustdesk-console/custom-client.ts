@@ -42,14 +42,3 @@ export async function deleteBuild(uuid: string) {
     skipErrorHandler: true,
   });
 }
-
-export async function downloadBuildFile(uuid: string, filename: string) {
-  return request<Blob>(
-    `/api/custom-client/builds/${uuid}/files/${encodeURIComponent(filename)}`,
-    {
-      method: 'GET',
-      responseType: 'blob',
-      skipErrorHandler: true,
-    },
-  );
-}
