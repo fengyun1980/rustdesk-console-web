@@ -340,28 +340,15 @@ const CreateBuildModal: React.FC<CreateBuildModalProps> = ({
                 extra={intl.formatMessage({
                   id: 'pages.customClient.saltExtra',
                   defaultMessage:
-                    'Generated automatically and used to encrypt the built-in config. Usually no need to change.',
+                    'Generated automatically. No need to change it.',
                 })}
               >
                 <Input.Password
+                  readOnly
                   placeholder={intl.formatMessage({
                     id: 'pages.customClient.saltPlaceholder',
                     defaultMessage: 'Enter salt',
                   })}
-                  addonAfter={
-                    <Button
-                      type="text"
-                      size="small"
-                      onClick={() =>
-                        form.setFieldValue('salt', generateSalt())
-                      }
-                    >
-                      {intl.formatMessage({
-                        id: 'pages.customClient.saltRegenerate',
-                        defaultMessage: 'Regenerate',
-                      })}
-                    </Button>
-                  }
                 />
               </Form.Item>
             </Col>

@@ -21,10 +21,8 @@ export default {
   'pages.customClient.password': '密码',
   'pages.customClient.passwordPlaceholder': '请输入密码',
   'pages.customClient.salt': '密码加盐字符',
-  'pages.customClient.saltPlaceholder': '随便填一串别人猜不到的字符',
-  'pages.customClient.saltExtra':
-    '打开时会自动生成，用来加密客户端内置配置，一般不用改。',
-  'pages.customClient.saltRegenerate': '重新生成',
+  'pages.customClient.saltPlaceholder': '自动生成',
+  'pages.customClient.saltExtra': '打开时自动生成，不需要修改。',
   'pages.customClient.connType': '连接类型',
   'pages.customClient.disableInstallation': '禁用安装功能',
   'pages.customClient.disableSettings': '禁用设置功能',
