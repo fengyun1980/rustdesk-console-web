@@ -160,6 +160,29 @@ ol {
     word-break: break-word;
   }
 
+  // 分类选项卡：改用手势横滑（antd 默认靠左右箭头，手机上几乎点不到）
+  .ant-tabs > .ant-tabs-nav .ant-tabs-nav-wrap {
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+  .ant-tabs > .ant-tabs-nav .ant-tabs-nav-list {
+    transform: none !important;
+  }
+  .ant-tabs > .ant-tabs-nav .ant-tabs-nav-operations {
+    display: none !important;
+  }
+  .ant-tabs > .ant-tabs-nav .ant-tabs-tab {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+
   // 页面内容左右留白收紧，给内容更多宽度
   .ant-pro-page-container-children-container,
   .ant-pro-page-container-children-content {
