@@ -1,6 +1,6 @@
 export const DEFAULT_GENERAL_SETTINGS: API.GeneralSettings = {
   watermarkEnabled: true,
-  defaultLanguage: 'en-US',
+  defaultLanguage: 'zh-CN',
   jwtExpiryDays: 30,
   auditRetentionDays: 0,
   deviceCloneIsolation: false,
@@ -16,7 +16,7 @@ export const DEFAULT_GENERAL_SETTINGS: API.GeneralSettings = {
 
 export const DEFAULT_FRONTEND_SETTINGS: API.FrontendSettings = {
   watermarkEnabled: true,
-  defaultLanguage: 'en-US',
+  defaultLanguage: 'zh-CN',
   webauthnEnabled: false,
 };
 

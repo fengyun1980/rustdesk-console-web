@@ -44,9 +44,9 @@ const config: ReturnType<typeof defineConfig> = defineConfig({
     plugins: ['duration'],
   },
   locale: {
-    default: 'en-US',
+    default: 'zh-CN',
     antd: true,
-    baseNavigator: true,
+    baseNavigator: false,
   },
   antd: {
     appConfig: {},
