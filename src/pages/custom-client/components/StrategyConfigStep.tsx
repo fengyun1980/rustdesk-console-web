@@ -205,6 +205,7 @@ const ConfigOptionControl: React.FC<{
 
   return (
     <div
+      className="custom-client-strategy-row"
       style={{
         display: 'flex',
         alignItems: 'flex-start',
@@ -213,11 +214,17 @@ const ConfigOptionControl: React.FC<{
         borderBottom: '1px solid #f0f0f0',
       }}
     >
-      <div style={{ flex: '0 0 260px', paddingRight: 12, lineHeight: '32px' }}>
+      <div
+        className="custom-client-strategy-label"
+        style={{ flex: '0 0 260px', paddingRight: 12, lineHeight: '32px' }}
+      >
         {labelNode}
       </div>
-      <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 8 }}>
-        <div style={{ flex: 1 }}>{control}</div>
+      <div
+        className="custom-client-strategy-control"
+        style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 8 }}
+      >
+        <div style={{ flex: 1, minWidth: 0 }}>{control}</div>
         <Segmented
           size="small"
           value={mode}
