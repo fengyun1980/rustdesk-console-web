@@ -20,8 +20,10 @@ export default {
   'pages.customClient.customConfig': '定制配置',
   'pages.customClient.password': '密码',
   'pages.customClient.passwordPlaceholder': '请输入密码',
-  'pages.customClient.salt': '盐值',
-  'pages.customClient.saltPlaceholder': '请输入盐值',
+  'pages.customClient.salt': '密码加盐字符',
+  'pages.customClient.saltPlaceholder': '随便填一串别人猜不到的字符',
+  'pages.customClient.saltExtra':
+    '和密码一起用来加密，随便填一串字符就行，注意客户端和服务器要保持一致。',
   'pages.customClient.connType': '连接类型',
   'pages.customClient.disableInstallation': '禁用安装功能',
   'pages.customClient.disableSettings': '禁用设置功能',

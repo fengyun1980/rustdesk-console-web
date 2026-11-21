@@ -315,6 +315,11 @@ const CreateBuildModal: React.FC<CreateBuildModalProps> = ({
                   id: 'pages.customClient.salt',
                   defaultMessage: 'Salt',
                 })}
+                extra={intl.formatMessage({
+                  id: 'pages.customClient.saltExtra',
+                  defaultMessage:
+                    'Used to encrypt the password. Any random string works; keep it the same between client and server.',
+                })}
               >
                 <Input.Password
                   placeholder={intl.formatMessage({
