@@ -229,11 +229,12 @@ const ConfigOptionControl: React.FC<{
   );
 };
 
-const hostFromWsUrl = (url?: string): string => {
+// 原生客户端连的是 hbbs/hbbr 的 TCP/UDP 端口，而不是网页客户端用的 WebSocket 端口，
+// 所以只取主机名，再按 RustDesk 约定补上 21116（ID）/ 21117（中继）。
+const hostFromWsUrl = (url: string | undefined, port: number): string => {
   if (!url) return '';
   try {
-    const parsed = new URL(url);
-    return parsed.port ? `${parsed.hostname}:${parsed.port}` : parsed.hostname;
+    return `${new URL(url).hostname}:${port}`;
   } catch {
     return '';
   }
@@ -264,8 +265,8 @@ const StrategyConfigStep: React.FC<StrategyConfigStepProps> = ({
       .then((settings) => {
         if (!settings) return;
         const presets: StrategyConfigValues = {};
-        const idServer = hostFromWsUrl(settings.idServerUrl);
-        const relayServer = hostFromWsUrl(settings.relayServerUrl);
+        const idServer = hostFromWsUrl(settings.idServerUrl, 21116);
+        const relayServer = hostFromWsUrl(settings.relayServerUrl, 21117);
         if (idServer) {
           presets['custom-rendezvous-server'] = {
             mode: 'default',
