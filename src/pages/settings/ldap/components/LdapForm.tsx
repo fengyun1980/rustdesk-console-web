@@ -76,7 +76,7 @@ const LdapForm: React.FC<LdapFormProps> = ({
                       ]}
                     >
                       <Input
-                        style={{ width: 500 }}
+                        style={{ width: '100%', maxWidth: 500 }}
                         placeholder={intl.formatMessage({
                           id: 'pages.ldap.urlPlaceholder',
                           defaultMessage: 'e.g. ldaps://ad.example.com:636',
@@ -93,7 +93,7 @@ const LdapForm: React.FC<LdapFormProps> = ({
                 type="dashed"
                 onClick={() => add('')}
                 icon={<PlusOutlined />}
-                style={{ width: 500 }}
+                style={{ width: '100%', maxWidth: 500 }}
               >
                 <FormattedMessage
                   id="pages.ldap.addUrl"
@@ -236,7 +236,7 @@ const LdapForm: React.FC<LdapFormProps> = ({
                 >
                   <Form.Item {...field} noStyle>
                     <Input
-                      style={{ width: 300 }}
+                      style={{ width: '100%', maxWidth: 300 }}
                       placeholder={intl.formatMessage({
                         id: 'pages.ldap.searchAttributePlaceholder',
                         defaultMessage:
@@ -335,7 +335,7 @@ const LdapForm: React.FC<LdapFormProps> = ({
                 >
                   <Form.Item {...field} noStyle>
                     <Input
-                      style={{ width: 500 }}
+                      style={{ width: '100%', maxWidth: 500 }}
                       placeholder={intl.formatMessage({
                         id: 'pages.ldap.adminGroupPlaceholder',
                         defaultMessage:

@@ -15,6 +15,7 @@ import settings from './pages/settings';
 import dashboard from './pages/dashboard';
 import serverSettings from './pages/serverSettings';
 import common from './pages/common';
+import setup from './pages/setup';
 
 export default {
   ...strategies,
@@ -34,4 +35,5 @@ export default {
   ...dashboard,
   ...serverSettings,
   ...common,
+  ...setup,
 };

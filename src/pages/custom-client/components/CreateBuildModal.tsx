@@ -25,6 +25,27 @@ import StrategyConfigStep, {
   type StrategyConfigValues,
 } from './StrategyConfigStep';
 
+const SALT_CHARS =
+  'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+
+// 随机生成加盐字符串，用户不用自己想
+const generateSalt = (length = 16) => {
+  const chars: string[] = [];
+  if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+    const bytes = crypto.getRandomValues(new Uint8Array(length));
+    for (let i = 0; i < length; i += 1) {
+      chars.push(SALT_CHARS[bytes[i] % SALT_CHARS.length]);
+    }
+  } else {
+    for (let i = 0; i < length; i += 1) {
+      chars.push(
+        SALT_CHARS[Math.floor(Math.random() * SALT_CHARS.length)],
+      );
+    }
+  }
+  return chars.join('');
+};
+
 const DISABLE_FIELDS = [
   {
     name: 'disable-installation',
@@ -84,6 +105,7 @@ const CreateBuildModal: React.FC<CreateBuildModalProps> = ({
         os: 'windows',
         arch: 'x86_64',
         'conn-type': 'both',
+        salt: generateSalt(),
       });
       setCurrentStep(0);
       setStrategyConfig({});
@@ -107,7 +129,7 @@ const CreateBuildModal: React.FC<CreateBuildModalProps> = ({
   }, [osValue, availableArchs, isAllOs, form]);
 
   const renderDisableField = (field: (typeof DISABLE_FIELDS)[number]) => (
-    <Col key={field.name} span={12}>
+    <Col key={field.name} xs={24} sm={12}>
       <Form.Item
         name={field.name}
         valuePropName="checked"
@@ -230,7 +252,7 @@ const CreateBuildModal: React.FC<CreateBuildModalProps> = ({
           </Divider>
 
           <Row gutter={16}>
-            <Col span={12}>
+            <Col xs={24} sm={12}>
               <Form.Item
                 name="os"
                 label={intl.formatMessage({
@@ -242,7 +264,7 @@ const CreateBuildModal: React.FC<CreateBuildModalProps> = ({
                 <Select options={OS_OPTIONS} />
               </Form.Item>
             </Col>
-            <Col span={12}>
+            <Col xs={24} sm={12}>
               {!isAllOs && (
                 <Form.Item
                   name="arch"
@@ -292,7 +314,7 @@ const CreateBuildModal: React.FC<CreateBuildModalProps> = ({
           </Divider>
 
           <Row gutter={16}>
-            <Col span={12}>
+            <Col xs={24} sm={12}>
               <Form.Item
                 name="password"
                 label={intl.formatMessage({
@@ -308,15 +330,21 @@ const CreateBuildModal: React.FC<CreateBuildModalProps> = ({
                 />
               </Form.Item>
             </Col>
-            <Col span={12}>
+            <Col xs={24} sm={12}>
               <Form.Item
                 name="salt"
                 label={intl.formatMessage({
                   id: 'pages.customClient.salt',
                   defaultMessage: 'Salt',
                 })}
+                extra={intl.formatMessage({
+                  id: 'pages.customClient.saltExtra',
+                  defaultMessage:
+                    'Generated automatically. No need to change it.',
+                })}
               >
                 <Input.Password
+                  readOnly
                   placeholder={intl.formatMessage({
                     id: 'pages.customClient.saltPlaceholder',
                     defaultMessage: 'Enter salt',

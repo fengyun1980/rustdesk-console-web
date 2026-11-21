@@ -68,7 +68,7 @@ const BatchActionsBar: React.FC<BatchActionsBarProps> = ({
 
   if (mode === 'move') {
     return (
-      <Space size={16}>
+      <Space size={16} wrap>
         <Select
           aria-label={intl.formatMessage({
             id: 'pages.userGroups.destination',

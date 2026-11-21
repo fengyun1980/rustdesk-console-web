@@ -34,17 +34,6 @@ export async function getBuildFiles(uuid: string) {
   });
 }
 
-export async function downloadBuildFile(uuid: string, filename: string) {
-  return request<Blob>(
-    `/api/custom-client/builds/${uuid}/files/${encodeURIComponent(filename)}`,
-    {
-      method: 'GET',
-      responseType: 'blob',
-      skipErrorHandler: true,
-    },
-  );
-}
-
 export async function getBuildProgress(uuid: string) {
   return request<API.CustomClientBuildProgress>(
     `/api/custom-client/builds/${uuid}/progress`,

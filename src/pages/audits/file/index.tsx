@@ -457,6 +457,7 @@ const FileAudit: React.FC = () => {
           </Tooltip>,
         ]}
         pagination={DEFAULT_PAGINATION}
+        scroll={{ x: 'max-content' }}
       />
       <Drawer
         title={

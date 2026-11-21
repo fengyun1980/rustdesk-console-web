@@ -11,6 +11,7 @@ import {
 } from 'antd';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { getStrategyList } from '@/services/rustdesk-console';
+import { getWebClientSettings } from '@/services/rustdesk-console/webClientSettings';
 import {
   type ConfigOption,
   configCategories,
@@ -204,6 +205,7 @@ const ConfigOptionControl: React.FC<{
 
   return (
     <div
+      className="strategy-config-row"
       style={{
         display: 'flex',
         alignItems: 'flex-start',
@@ -212,11 +214,17 @@ const ConfigOptionControl: React.FC<{
         borderBottom: '1px solid #f0f0f0',
       }}
     >
-      <div style={{ flex: '0 0 260px', paddingRight: 12, lineHeight: '32px' }}>
+      <div
+        className="strategy-config-label"
+        style={{ flex: '0 0 260px', paddingRight: 12, lineHeight: '32px' }}
+      >
         {labelNode}
       </div>
-      <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 8 }}>
-        <div style={{ flex: 1 }}>{control}</div>
+      <div
+        className="strategy-config-control"
+        style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 8 }}
+      >
+        <div style={{ flex: 1, minWidth: 0 }}>{control}</div>
         <Segmented
           size="small"
           value={mode}
@@ -226,6 +234,17 @@ const ConfigOptionControl: React.FC<{
       </div>
     </div>
   );
+};
+
+// 原生客户端连的是 hbbs/hbbr 的 TCP/UDP 端口，而不是网页客户端用的 WebSocket 端口，
+// 所以只取主机名，再按 RustDesk 约定补上 21116（ID）/ 21117（中继）。
+const hostFromWsUrl = (url: string | undefined, port: number): string => {
+  if (!url) return '';
+  try {
+    return `${new URL(url).hostname}:${port}`;
+  } catch {
+    return '';
+  }
 };
 
 const StrategyConfigStep: React.FC<StrategyConfigStepProps> = ({
@@ -244,6 +263,35 @@ const StrategyConfigStep: React.FC<StrategyConfigStepProps> = ({
   useEffect(() => {
     setLocalValue({ ...value });
   }, [value]);
+
+  useEffect(() => {
+    // 用「网页客户端设置」里已配置的 ID/中继地址和公钥预填网络配置，避免每次手动填写。
+    // 仅当用户尚未选择任何配置时预填，且不覆盖用户已有的设置。
+    if (Object.keys(value).length > 0) return;
+    getWebClientSettings()
+      .then((settings) => {
+        if (!settings) return;
+        const presets: StrategyConfigValues = {};
+        const idServer = hostFromWsUrl(settings.idServerUrl, 21116);
+        const relayServer = hostFromWsUrl(settings.relayServerUrl, 21117);
+        if (idServer) {
+          presets['custom-rendezvous-server'] = {
+            mode: 'default',
+            value: idServer,
+          };
+        }
+        if (relayServer) {
+          presets['relay-server'] = { mode: 'default', value: relayServer };
+        }
+        if (settings.serverPublicKey) {
+          presets.key = { mode: 'default', value: settings.serverPublicKey };
+        }
+        if (Object.keys(presets).length === 0) return;
+        setLocalValue(presets);
+        onChange?.(presets);
+      })
+      .catch(() => undefined);
+  }, [value, onChange]);
 
   useEffect(() => {
     getStrategyList({ pageSize: 100 })

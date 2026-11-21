@@ -123,7 +123,6 @@ export {
   submitBuild,
   deleteBuild,
   getBuildFiles,
-  downloadBuildFile,
   getBuildProgress,
   getCustomClientSettings,
   updateCustomClientSettings,

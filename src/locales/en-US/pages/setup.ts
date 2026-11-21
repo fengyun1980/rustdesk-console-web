@@ -1,0 +1,40 @@
+export default {
+  'pages.setup.title': 'RustDesk Console — Initial Setup',
+  'pages.setup.intro':
+    'Enter your server address below. It is used by the console front-end, web client (remote control), and custom-client builds.',
+  'pages.setup.serverUrl.label': 'Server address',
+  'pages.setup.serverUrl.required': 'Please enter your server address',
+  'pages.setup.serverUrl.invalid': 'Use http:// or https://, without path, query or spaces',
+  'pages.setup.serverUrl.help': 'Example: https://console.example.com',
+  'pages.setup.serverPublicKey.label': 'Server public key (optional)',
+  'pages.setup.serverPublicKey.help':
+    'Ed25519 public key from Server Pro hbbs (id_ed25519.pub). Paste it to auto-enable web client; you can do this later too.',
+  'pages.setup.passwordSection': 'Admin password (optional)',
+  'pages.setup.passwordHelp': 'Change the built-in admin password now. Leave blank to keep the existing one.',
+  'pages.setup.currentPassword': 'Current password',
+  'pages.setup.newPassword': 'New password',
+  'pages.setup.newPassword.min': 'At least 6 characters',
+  'pages.setup.confirmPassword': 'Confirm new password',
+  'pages.setup.confirmPassword.mismatch': 'Passwords do not match',
+  'pages.setup.submit': 'Save and continue',
+  'pages.setup.success': 'Setup completed successfully',
+  'pages.setup.submitFailed': 'Failed to save settings',
+  'pages.setup.result.title': 'Setup complete',
+  'pages.setup.result.done': 'Server address saved: {origin}',
+  'pages.setup.result.webClient': 'Web client (remote control):',
+  'pages.setup.result.enabled': 'Enabled',
+  'pages.setup.result.disabled': 'Address set, needs public key',
+  'pages.setup.result.skipped': 'Skipped (HTTPS required)',
+  'pages.setup.result.idServer': 'ID server:',
+  'pages.setup.result.relayServer': 'Relay server:',
+  'pages.setup.result.allowedOrigin': 'Allowed origin:',
+  'pages.setup.result.warnings': 'Please note',
+  'pages.setup.result.nextTitle': 'Next steps',
+  'pages.setup.result.next.hbbsRelay':
+    'Make sure Server Pro hbbs relay-servers match this address.',
+  'pages.setup.result.next.webClientKey':
+    'If web client is still disabled, paste Server Pro hbbs id_ed25519.pub into Settings → Web Client.',
+  'pages.setup.result.next.publicDomain':
+    'Access the console through a public domain (not localhost).',
+  'pages.setup.result.goLogin': 'Go to login',
+};

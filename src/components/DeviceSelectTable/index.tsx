@@ -48,6 +48,7 @@ const DeviceSelectTable: React.FC<DeviceSelectTableProps> = ({
         return toTableResult(result);
       }}
       columns={columns}
+      scroll={{ x: 'max-content' }}
       rowSelection={{
         selectedRowKeys,
         onChange: onSelectionChange,

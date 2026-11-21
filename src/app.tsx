@@ -14,7 +14,7 @@ import {
 } from '@/components';
 import { currentUser as queryCurrentUser } from '@/services/rustdesk-console/auth';
 import { getMyPermissions } from '@/services/rustdesk-console/permission';
-import { getFrontendSettings } from '@/services/rustdesk-console/settings';
+import { getFrontendSettings, getSetupStatus } from '@/services/rustdesk-console/settings';
 import { getLoginPath, getToken, removeToken } from '@/utils/auth';
 import {
   DEFAULT_FRONTEND_SETTINGS,
@@ -72,6 +72,7 @@ export async function getInitialState(): Promise<{
   fetchUserInfo?: () => Promise<API.CurrentUser | undefined>;
   fetchPermissions?: () => Promise<API.EffectivePermissions | undefined>;
   frontendSettings?: API.FrontendSettings;
+  setupCompleted?: boolean;
 }> {
   const fetchUserInfo = async () => {
     try {
@@ -92,12 +93,44 @@ export async function getInitialState(): Promise<{
     ...(defaultSettings as Partial<LayoutSettings>),
     ...storedTheme,
   };
+
+  // ---- Public setup status (runs before any JWT-protected call) ----
+  let setupCompleted = true;
+  try {
+    const setup = await getSetupStatus();
+    setupCompleted = !!setup?.completed;
+  } catch {
+    // If the endpoint errors (old backend, etc.), proceed as if completed
+    // so the upgrade path is unaffected.
+    setupCompleted = true;
+  }
+
+  const { location } = history;
+  const onSetupPage = location.pathname === '/setup';
+
+  // Redirect to wizard when setup is incomplete and we aren't already there
+  if (!setupCompleted && !onSetupPage) {
+    history.replace('/setup');
+    // Return a minimal initialState; the wizard page handles its own UI
+    return {
+      fetchUserInfo,
+      fetchPermissions,
+      settings: initialSettings,
+      setupCompleted: false,
+    };
+  }
+
+  // If we ARE on the setup page but setup is already completed (e.g. refresh
+  // after completion), send user to login instead of showing the wizard again.
+  if (onSetupPage && setupCompleted) {
+    history.replace(loginPath);
+  }
+
   const frontendSettingsPromise = getFrontendSettings({
     skipErrorHandler: true,
   }).catch(() => DEFAULT_FRONTEND_SETTINGS);
 
-  const { location } = history;
-  if (![loginPath].includes(location.pathname) && getToken()) {
+  if (![loginPath, '/setup'].includes(location.pathname) && getToken()) {
     const [currentUser, frontendSettings] = await Promise.all([
       fetchUserInfo(),
       frontendSettingsPromise,
@@ -132,6 +165,7 @@ export async function getInitialState(): Promise<{
       permissionsLoadFailed,
       settings: initialSettings,
       frontendSettings,
+      setupCompleted,
     };
   }
   const frontendSettings = await frontendSettingsPromise;
@@ -141,6 +175,7 @@ export async function getInitialState(): Promise<{
     fetchPermissions,
     settings: initialSettings,
     frontendSettings,
+    setupCompleted,
   };
 }
 
@@ -157,6 +192,16 @@ export const layout: RunTimeLayoutConfig = ({
 
   return {
     ...initialState?.settings,
+    token: {
+      ...initialState?.settings?.token,
+      sider: {
+        ...initialState?.settings?.token?.sider,
+        colorMenuBackground:
+          initialState?.settings?.navTheme === 'realDark'
+            ? '#141414'
+            : '#ffffff',
+      },
+    },
     actionsRender: () => [
       <ThemeToggle key="ThemeToggle" />,
       <SelectLang key="SelectLang" />,
@@ -173,7 +218,11 @@ export const layout: RunTimeLayoutConfig = ({
     footerRender: () => <Footer />,
     onPageChange: () => {
       const { location } = history;
-      if (!initialState?.currentUser && location.pathname !== loginPath) {
+      if (
+        !initialState?.currentUser &&
+        location.pathname !== loginPath &&
+        location.pathname !== '/setup'
+      ) {
         history.push(getLoginPath(history.location));
       }
     },

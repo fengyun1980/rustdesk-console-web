@@ -1,7 +1,6 @@
 import {
   CheckCircleOutlined,
   ClockCircleOutlined,
-  CloudDownloadOutlined,
   DeleteOutlined,
   GithubOutlined,
   LoadingOutlined,
@@ -17,8 +16,8 @@ import { App, Button, Popconfirm, Space, Tag, Typography } from 'antd';
 import React from 'react';
 import {
   deleteBuild,
-  downloadBuildFile,
   getBuildList,
+  getCustomClientSettings,
 } from '@/services/rustdesk-console/custom-client';
 
 const { Title } = Typography;
@@ -68,9 +67,17 @@ const BuildList: React.FC<BuildListProps> = ({
   const intl = useIntl();
   const { message: msgApi } = App.useApp();
   const pollRef = React.useRef<ReturnType<typeof setInterval> | null>(null);
-  const [downloadLoading, setDownloadLoading] = React.useState<Set<string>>(
-    new Set(),
+  const [generatorRepo, setGeneratorRepo] = React.useState<string>(
+    'databk/rustdesk-generator',
   );
+
+  React.useEffect(() => {
+    getCustomClientSettings()
+      .then((settings) => {
+        if (settings?.generatorRepo) setGeneratorRepo(settings.generatorRepo);
+      })
+      .catch(() => undefined);
+  }, []);
 
   const statusLabel = (status: string) => {
     const map: Record<string, string> = {
@@ -154,37 +161,9 @@ const BuildList: React.FC<BuildListProps> = ({
     }
   };
 
-  const handleDownload = async (uuid: string, filename: string) => {
-    setDownloadLoading((prev) => new Set(prev).add(uuid));
-    try {
-      const blob = await downloadBuildFile(uuid, filename);
-      const url = window.URL.createObjectURL(new Blob([blob]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', filename);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
-    } catch {
-      msgApi.error(
-        intl.formatMessage({
-          id: 'pages.customClient.downloadFailed',
-          defaultMessage: 'Failed to download custom client',
-        }),
-      );
-    } finally {
-      setDownloadLoading((prev) => {
-        const next = new Set(prev);
-        next.delete(uuid);
-        return next;
-      });
-    }
-  };
-
   const githubActionUrl = (record: API.CustomClientBuild): string | null => {
     if (!record.githubRunId) return null;
-    return `https://github.com/rustdesk/rustdesk/actions/runs/${record.githubRunId}`;
+    return `https://github.com/${generatorRepo}/actions/runs/${record.githubRunId}`;
   };
 
   const columns: ProColumns<API.CustomClientBuild>[] = [
@@ -257,8 +236,9 @@ const BuildList: React.FC<BuildListProps> = ({
       width: 280,
       search: false,
       render: (_: any, record: API.CustomClientBuild) => {
-        const isDownloading = downloadLoading.has(record.uuid);
-        const files: string[] = record.files ? JSON.parse(record.files) : [];
+        const files: { name: string; url: string }[] = record.files
+          ? JSON.parse(record.files)
+          : [];
         const isInProgress =
           record.status === 'pending' || record.status === 'building';
         const isTerminal = TERMINAL_STATUSES.includes(record.status);
@@ -311,22 +291,15 @@ const BuildList: React.FC<BuildListProps> = ({
             )}
             {record.status === 'completed' &&
               files.map((file) => (
-                <Button
-                  key={file}
-                  type="link"
-                  size="small"
-                  icon={
-                    isDownloading ? (
-                      <LoadingOutlined />
-                    ) : (
-                      <CloudDownloadOutlined />
-                    )
-                  }
-                  loading={isDownloading}
-                  onClick={() => handleDownload(record.uuid, file)}
+                <a
+                  key={file.url}
+                  href={file.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  style={{ marginRight: 8 }}
                 >
-                  {file}
-                </Button>
+                  {file.name}
+                </a>
               ))}
             {isTerminal && (
               <Popconfirm
