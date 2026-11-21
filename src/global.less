@@ -61,6 +61,11 @@ body,
   left: unset;
 }
 
+// 兜底：侧边菜单背景必须不透明，避免长页面滚动时内容从菜单后透出
+.ant-pro-sider {
+  background-color: var(--ant-color-bg-container, #ffffff);
+}
+
 canvas {
   display: block;
 }

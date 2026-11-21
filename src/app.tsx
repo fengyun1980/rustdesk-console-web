@@ -192,6 +192,16 @@ export const layout: RunTimeLayoutConfig = ({
 
   return {
     ...initialState?.settings,
+    token: {
+      ...initialState?.settings?.token,
+      sider: {
+        ...initialState?.settings?.token?.sider,
+        colorMenuBackground:
+          initialState?.settings?.navTheme === 'realDark'
+            ? '#141414'
+            : '#ffffff',
+      },
+    },
     actionsRender: () => [
       <ThemeToggle key="ThemeToggle" />,
       <SelectLang key="SelectLang" />,
