@@ -319,7 +319,7 @@ const ConnectionAudit: React.FC = () => {
             </Tooltip>,
           ]}
           pagination={DEFAULT_PAGINATION}
-          scroll={{ x: '100%' }}
+          scroll={{ x: 'max-content' }}
           options={{
             density: true,
             setting: { listsHeight: 400 },

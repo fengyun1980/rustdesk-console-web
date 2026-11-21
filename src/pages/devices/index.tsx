@@ -613,7 +613,7 @@ const DeviceList: React.FC<DeviceListProps> = ({
         }}
         columns={columns}
         pagination={DEFAULT_PAGINATION}
-        scroll={{ x: '100%' }}
+        scroll={{ x: 'max-content' }}
         toolBarRender={() => {
           const buttons: React.ReactNode[] = [];
           if (!deviceGroupGuid) {

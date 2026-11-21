@@ -107,7 +107,7 @@ const CreateBuildModal: React.FC<CreateBuildModalProps> = ({
   }, [osValue, availableArchs, isAllOs, form]);
 
   const renderDisableField = (field: (typeof DISABLE_FIELDS)[number]) => (
-    <Col key={field.name} span={12}>
+    <Col key={field.name} xs={24} sm={12}>
       <Form.Item
         name={field.name}
         valuePropName="checked"
@@ -230,7 +230,7 @@ const CreateBuildModal: React.FC<CreateBuildModalProps> = ({
           </Divider>
 
           <Row gutter={16}>
-            <Col span={12}>
+            <Col xs={24} sm={12}>
               <Form.Item
                 name="os"
                 label={intl.formatMessage({
@@ -242,7 +242,7 @@ const CreateBuildModal: React.FC<CreateBuildModalProps> = ({
                 <Select options={OS_OPTIONS} />
               </Form.Item>
             </Col>
-            <Col span={12}>
+            <Col xs={24} sm={12}>
               {!isAllOs && (
                 <Form.Item
                   name="arch"
@@ -292,7 +292,7 @@ const CreateBuildModal: React.FC<CreateBuildModalProps> = ({
           </Divider>
 
           <Row gutter={16}>
-            <Col span={12}>
+            <Col xs={24} sm={12}>
               <Form.Item
                 name="password"
                 label={intl.formatMessage({
@@ -308,7 +308,7 @@ const CreateBuildModal: React.FC<CreateBuildModalProps> = ({
                 />
               </Form.Item>
             </Col>
-            <Col span={12}>
+            <Col xs={24} sm={12}>
               <Form.Item
                 name="salt"
                 label={intl.formatMessage({
