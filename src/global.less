@@ -81,20 +81,20 @@ ol {
   list-style: none;
 }
 
-// 自定义客户端「策略配置」每行：窄屏改为上下两行，避免右侧控件被裁掉
+// 策略配置每行：窄屏改为上下两行，避免右侧控件被裁掉
 @media (max-width: 768px) {
-  .custom-client-strategy-row {
+  .strategy-config-row {
     flex-direction: column;
     align-items: stretch !important;
     gap: 4px;
   }
-  .custom-client-strategy-label {
+  .strategy-config-label {
     flex: none !important;
     width: 100%;
     padding-right: 0 !important;
     line-height: 1.5 !important;
   }
-  .custom-client-strategy-control {
+  .strategy-config-control {
     width: 100%;
   }
 }
