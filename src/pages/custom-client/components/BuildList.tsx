@@ -14,7 +14,11 @@ import { ProTable } from '@ant-design/pro-components';
 import { FormattedMessage, useIntl } from '@umijs/max';
 import { App, Button, Popconfirm, Space, Tag, Typography } from 'antd';
 import React from 'react';
-import { deleteBuild, getBuildList } from '@/services/rustdesk-console/custom-client';
+import {
+  deleteBuild,
+  getBuildList,
+  getCustomClientSettings,
+} from '@/services/rustdesk-console/custom-client';
 
 const { Title } = Typography;
 
@@ -63,6 +67,17 @@ const BuildList: React.FC<BuildListProps> = ({
   const intl = useIntl();
   const { message: msgApi } = App.useApp();
   const pollRef = React.useRef<ReturnType<typeof setInterval> | null>(null);
+  const [generatorRepo, setGeneratorRepo] = React.useState<string>(
+    'databk/rustdesk-generator',
+  );
+
+  React.useEffect(() => {
+    getCustomClientSettings()
+      .then((settings) => {
+        if (settings?.generatorRepo) setGeneratorRepo(settings.generatorRepo);
+      })
+      .catch(() => undefined);
+  }, []);
 
   const statusLabel = (status: string) => {
     const map: Record<string, string> = {
@@ -148,7 +163,7 @@ const BuildList: React.FC<BuildListProps> = ({
 
   const githubActionUrl = (record: API.CustomClientBuild): string | null => {
     if (!record.githubRunId) return null;
-    return `https://github.com/rustdesk/rustdesk/actions/runs/${record.githubRunId}`;
+    return `https://github.com/${generatorRepo}/actions/runs/${record.githubRunId}`;
   };
 
   const columns: ProColumns<API.CustomClientBuild>[] = [

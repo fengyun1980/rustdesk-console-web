@@ -11,6 +11,7 @@ import {
 } from 'antd';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { getStrategyList } from '@/services/rustdesk-console';
+import { getWebClientSettings } from '@/services/rustdesk-console/webClientSettings';
 import {
   type ConfigOption,
   configCategories,
@@ -228,6 +229,16 @@ const ConfigOptionControl: React.FC<{
   );
 };
 
+const hostFromWsUrl = (url?: string): string => {
+  if (!url) return '';
+  try {
+    const parsed = new URL(url);
+    return parsed.port ? `${parsed.hostname}:${parsed.port}` : parsed.hostname;
+  } catch {
+    return '';
+  }
+};
+
 const StrategyConfigStep: React.FC<StrategyConfigStepProps> = ({
   value = {},
   onChange,
@@ -244,6 +255,35 @@ const StrategyConfigStep: React.FC<StrategyConfigStepProps> = ({
   useEffect(() => {
     setLocalValue({ ...value });
   }, [value]);
+
+  useEffect(() => {
+    // 用「网页客户端设置」里已配置的 ID/中继地址和公钥预填网络配置，避免每次手动填写。
+    // 仅当用户尚未选择任何配置时预填，且不覆盖用户已有的设置。
+    if (Object.keys(value).length > 0) return;
+    getWebClientSettings()
+      .then((settings) => {
+        if (!settings) return;
+        const presets: StrategyConfigValues = {};
+        const idServer = hostFromWsUrl(settings.idServerUrl);
+        const relayServer = hostFromWsUrl(settings.relayServerUrl);
+        if (idServer) {
+          presets['custom-rendezvous-server'] = {
+            mode: 'default',
+            value: idServer,
+          };
+        }
+        if (relayServer) {
+          presets['relay-server'] = { mode: 'default', value: relayServer };
+        }
+        if (settings.serverPublicKey) {
+          presets.key = { mode: 'default', value: settings.serverPublicKey };
+        }
+        if (Object.keys(presets).length === 0) return;
+        setLocalValue(presets);
+        onChange?.(presets);
+      })
+      .catch(() => undefined);
+  }, [value, onChange]);
 
   useEffect(() => {
     getStrategyList({ pageSize: 100 })
