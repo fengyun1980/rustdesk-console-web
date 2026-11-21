@@ -29,7 +29,8 @@ export default function HeaderUpdateEntry() {
       setModalOpen(true);
   }, [enabled, update.state, update.job]);
 
-  if (!access.isSuperAdmin) return null;
+  // 未部署托管更新服务（如 fnOS 安装包）时不显示入口，避免误以为能在线升级
+  if (!access.isSuperAdmin || !update.capabilities?.supported) return null;
   const active = Boolean(
     update.job &&
       (update.job.status === 'queued' || update.job.status === 'running'),
