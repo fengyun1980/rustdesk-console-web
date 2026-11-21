@@ -23,7 +23,8 @@ export default {
   'pages.customClient.salt': '密码加盐字符',
   'pages.customClient.saltPlaceholder': '随便填一串别人猜不到的字符',
   'pages.customClient.saltExtra':
-    '和密码一起用来加密，随便填一串字符就行，注意客户端和服务器要保持一致。',
+    '打开时会自动生成，用来加密客户端内置配置，一般不用改。',
+  'pages.customClient.saltRegenerate': '重新生成',
   'pages.customClient.connType': '连接类型',
   'pages.customClient.disableInstallation': '禁用安装功能',
   'pages.customClient.disableSettings': '禁用设置功能',

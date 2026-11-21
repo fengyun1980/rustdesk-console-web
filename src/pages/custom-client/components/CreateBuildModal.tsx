@@ -25,6 +25,27 @@ import StrategyConfigStep, {
   type StrategyConfigValues,
 } from './StrategyConfigStep';
 
+const SALT_CHARS =
+  'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+
+// 随机生成加盐字符串，用户不用自己想
+const generateSalt = (length = 16) => {
+  const chars: string[] = [];
+  if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+    const bytes = crypto.getRandomValues(new Uint8Array(length));
+    for (let i = 0; i < length; i += 1) {
+      chars.push(SALT_CHARS[bytes[i] % SALT_CHARS.length]);
+    }
+  } else {
+    for (let i = 0; i < length; i += 1) {
+      chars.push(
+        SALT_CHARS[Math.floor(Math.random() * SALT_CHARS.length)],
+      );
+    }
+  }
+  return chars.join('');
+};
+
 const DISABLE_FIELDS = [
   {
     name: 'disable-installation',
@@ -84,6 +105,7 @@ const CreateBuildModal: React.FC<CreateBuildModalProps> = ({
         os: 'windows',
         arch: 'x86_64',
         'conn-type': 'both',
+        salt: generateSalt(),
       });
       setCurrentStep(0);
       setStrategyConfig({});
@@ -318,7 +340,7 @@ const CreateBuildModal: React.FC<CreateBuildModalProps> = ({
                 extra={intl.formatMessage({
                   id: 'pages.customClient.saltExtra',
                   defaultMessage:
-                    'Used to encrypt the password. Any random string works; keep it the same between client and server.',
+                    'Generated automatically and used to encrypt the built-in config. Usually no need to change.',
                 })}
               >
                 <Input.Password
@@ -326,6 +348,20 @@ const CreateBuildModal: React.FC<CreateBuildModalProps> = ({
                     id: 'pages.customClient.saltPlaceholder',
                     defaultMessage: 'Enter salt',
                   })}
+                  addonAfter={
+                    <Button
+                      type="text"
+                      size="small"
+                      onClick={() =>
+                        form.setFieldValue('salt', generateSalt())
+                      }
+                    >
+                      {intl.formatMessage({
+                        id: 'pages.customClient.saltRegenerate',
+                        defaultMessage: 'Regenerate',
+                      })}
+                    </Button>
+                  }
                 />
               </Form.Item>
             </Col>
