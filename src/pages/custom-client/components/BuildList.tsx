@@ -17,10 +17,19 @@ import type {
 } from '@ant-design/pro-components';
 import { ProTable } from '@ant-design/pro-components';
 import { FormattedMessage, useIntl } from '@umijs/max';
-import { App, Button, Popconfirm, Progress, Space, Tag, Typography } from 'antd';
+import {
+  App,
+  Button,
+  Grid,
+  Popconfirm,
+  Progress,
+  Space,
+  Tag,
+  Typography,
+} from 'antd';
+import React from 'react';
 import type { ResizeCallbackData } from 'react-resizable';
 import { Resizable } from 'react-resizable';
-import React from 'react';
 import {
   cancelBuild,
   deleteBuild,
@@ -127,6 +136,9 @@ const BuildList: React.FC<BuildListProps> = ({
 }) => {
   const intl = useIntl();
   const { message: msgApi } = App.useApp();
+  const screens = Grid.useBreakpoint();
+  // 窄屏（手机）只保留一列堆叠展示，避免宽表格横向溢出
+  const isMobile = screens.md === false;
   const pollRef = React.useRef<ReturnType<typeof setInterval> | null>(null);
   const [generatorRepo, setGeneratorRepo] = React.useState<string>(
     'databk/rustdesk-generator',
@@ -265,6 +277,212 @@ const BuildList: React.FC<BuildListProps> = ({
     return `https://github.com/${generatorRepo}/actions/runs/${record.githubRunId}`;
   };
 
+  const renderStatus = (
+    record: API.CustomClientBuild,
+    mobile = false,
+  ): React.ReactNode => {
+    const config = statusConfig[record.status] || {
+      color: 'default',
+      icon: null,
+    };
+    if (record.status === 'pending' || record.status === 'building') {
+      const percent = record.progress?.percent ?? 0;
+      const stepText =
+        record.progress?.currentStep ||
+        record.progress?.currentJob ||
+        intl.formatMessage({
+          id: 'pages.customClient.waitingGithub',
+          defaultMessage: 'Waiting for GitHub…',
+        });
+      const totalSteps = record.progress?.totalSteps ?? 0;
+      const completedSteps = record.progress?.completedSteps ?? 0;
+      return (
+        <div style={{ minWidth: mobile ? 0 : 160 }}>
+          <Space size={6} align="center" wrap>
+            <Tag color={config.color} icon={config.icon}>
+              {statusLabel(record.status)}
+            </Tag>
+            {totalSteps > 0 && (
+              <span
+                style={{
+                  fontSize: 12,
+                  color: 'var(--ant-color-primary, #1677ff)',
+                }}
+              >
+                {intl.formatMessage(
+                  {
+                    id: 'pages.customClient.stepCount',
+                    defaultMessage: 'Step: {completed}/{total}',
+                  },
+                  { completed: completedSteps, total: totalSteps },
+                )}
+              </span>
+            )}
+          </Space>
+          <Progress
+            percent={percent}
+            size="small"
+            status="active"
+            style={{ margin: '4px 0 2px' }}
+          />
+          <div
+            title={stepText}
+            style={{
+              fontSize: 12,
+              lineHeight: '16px',
+              color: 'var(--ant-color-text-tertiary, rgba(0, 0, 0, 0.45))',
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              maxWidth: mobile ? '100%' : 230,
+            }}
+          >
+            {stepText}
+          </div>
+        </div>
+      );
+    }
+    return (
+      <Tag color={config.color} icon={config.icon}>
+        {statusLabel(record.status)}
+      </Tag>
+    );
+  };
+
+  const renderActionItems = (
+    record: API.CustomClientBuild,
+  ): React.ReactNode[] => {
+    const files: { name: string; url: string }[] = (() => {
+      try {
+        return record.files ? JSON.parse(record.files) : [];
+      } catch {
+        return [];
+      }
+    })();
+    const isInProgress =
+      record.status === 'pending' || record.status === 'building';
+    const isTerminal = TERMINAL_STATUSES.includes(record.status);
+    const isRetryable = RETRYABLE_STATUSES.includes(record.status);
+    const actionUrl = githubActionUrl(record);
+    const items: React.ReactNode[] = [];
+
+    if (isInProgress) {
+      items.push(
+        <Popconfirm
+          key="cancel"
+          title={intl.formatMessage({
+            id: 'pages.customClient.cancelBuildConfirm',
+            defaultMessage: 'Are you sure you want to cancel this build?',
+          })}
+          onConfirm={() => handleCancel(record.uuid)}
+          okText={intl.formatMessage({
+            id: 'pages.common.confirm',
+            defaultMessage: 'Yes',
+          })}
+          cancelText={intl.formatMessage({
+            id: 'pages.common.cancel',
+            defaultMessage: 'No',
+          })}
+        >
+          <Button type="link" size="small" danger icon={<StopOutlined />}>
+            <FormattedMessage
+              id="pages.customClient.cancelBuild"
+              defaultMessage="Cancel"
+            />
+          </Button>
+        </Popconfirm>,
+        <Button
+          key="progress"
+          type="link"
+          size="small"
+          onClick={() => onProgress(record.uuid)}
+        >
+          <FormattedMessage
+            id="pages.customClient.viewProgress"
+            defaultMessage="Progress"
+          />
+        </Button>,
+      );
+    }
+    if (isRetryable) {
+      items.push(
+        <Button
+          key="retry"
+          type="link"
+          size="small"
+          icon={<RedoOutlined />}
+          onClick={() => onRetry(record)}
+        >
+          <FormattedMessage
+            id="pages.customClient.retryBuild"
+            defaultMessage="Retry"
+          />
+        </Button>,
+      );
+    }
+    if (actionUrl) {
+      items.push(
+        <Button
+          key="github"
+          type="link"
+          size="small"
+          icon={<GithubOutlined />}
+          href={actionUrl}
+          target="_blank"
+        >
+          <FormattedMessage
+            id="pages.customClient.viewOnGithub"
+            defaultMessage="GitHub"
+          />
+        </Button>,
+      );
+    }
+    if (record.status === 'completed') {
+      files.forEach((file) => {
+        items.push(
+          <a
+            key={`file-${file.url}`}
+            href={file.url}
+            target="_blank"
+            rel="noreferrer"
+            style={{ wordBreak: 'break-all' }}
+          >
+            {file.name}
+          </a>,
+        );
+      });
+    }
+    if (isTerminal) {
+      items.push(
+        <Popconfirm
+          key="delete"
+          title={intl.formatMessage({
+            id: 'pages.customClient.deleteBuildConfirm',
+            defaultMessage:
+              'Are you sure you want to delete this build record?',
+          })}
+          onConfirm={() => handleDelete(record.uuid)}
+          okText={intl.formatMessage({
+            id: 'pages.common.confirm',
+            defaultMessage: 'Yes',
+          })}
+          cancelText={intl.formatMessage({
+            id: 'pages.common.cancel',
+            defaultMessage: 'No',
+          })}
+        >
+          <Button type="link" size="small" danger icon={<DeleteOutlined />}>
+            <FormattedMessage
+              id="pages.common.delete"
+              defaultMessage="Delete"
+            />
+          </Button>
+        </Popconfirm>,
+      );
+    }
+    return items;
+  };
+
   const columns: ProColumns<API.CustomClientBuild>[] = [
     {
       title: intl.formatMessage({
@@ -303,17 +521,8 @@ const BuildList: React.FC<BuildListProps> = ({
       key: 'appName',
       width: 140,
       ellipsis: true,
-      render: (_: React.ReactNode, record: API.CustomClientBuild) => {
-        // 应用名称存在构建记录的 custom JSON 里，未设置时客户端默认使用 RustDesk
-        try {
-          const custom = record.custom ? JSON.parse(record.custom) : null;
-          const appName = custom?.['app-name'];
-          if (appName) return appName;
-        } catch {
-          // ignore malformed custom payload
-        }
-        return 'RustDesk';
-      },
+      render: (_: React.ReactNode, record: API.CustomClientBuild) =>
+        appNameOf(record),
     },
     {
       title: intl.formatMessage({
@@ -323,22 +532,8 @@ const BuildList: React.FC<BuildListProps> = ({
       dataIndex: 'rustdeskVersion',
       key: 'rustdeskVersion',
       width: 130,
-      render: (_: React.ReactNode, record: API.CustomClientBuild) => {
-        if (record.rustdeskVersion) return record.rustdeskVersion;
-        // 旧记录没有单独存版本，从产物文件名里兜底解析（如 rdservice-1.5.1-x86_64.exe）
-        try {
-          const files: { name: string }[] = record.files
-            ? JSON.parse(record.files)
-            : [];
-          for (const file of files) {
-            const matched = file.name.match(/\d+\.\d+\.\d+/);
-            if (matched) return matched[0];
-          }
-        } catch {
-          // ignore malformed files payload
-        }
-        return '-';
-      },
+      render: (_: React.ReactNode, record: API.CustomClientBuild) =>
+        versionOf(record),
     },
     {
       title: intl.formatMessage({
@@ -360,74 +555,8 @@ const BuildList: React.FC<BuildListProps> = ({
       dataIndex: 'status',
       key: 'status',
       width: 200,
-      render: (_: React.ReactNode, record: API.CustomClientBuild) => {
-        const config = statusConfig[record.status] || {
-          color: 'default',
-          icon: null,
-        };
-        if (record.status === 'pending' || record.status === 'building') {
-          const percent = record.progress?.percent ?? 0;
-          const stepText =
-            record.progress?.currentStep ||
-            record.progress?.currentJob ||
-            intl.formatMessage({
-              id: 'pages.customClient.waitingGithub',
-              defaultMessage: 'Waiting for GitHub…',
-            });
-          const totalSteps = record.progress?.totalSteps ?? 0;
-          const completedSteps = record.progress?.completedSteps ?? 0;
-          return (
-            <div style={{ minWidth: 160 }}>
-              <Space size={6} align="center">
-                <Tag color={config.color} icon={config.icon}>
-                  {statusLabel(record.status)}
-                </Tag>
-                {totalSteps > 0 && (
-                  <span
-                    style={{
-                      fontSize: 12,
-                      color: 'var(--ant-color-primary, #1677ff)',
-                    }}
-                  >
-                    {intl.formatMessage(
-                      {
-                        id: 'pages.customClient.stepCount',
-                        defaultMessage: 'Step: {completed}/{total}',
-                      },
-                      { completed: completedSteps, total: totalSteps },
-                    )}
-                  </span>
-                )}
-              </Space>
-              <Progress
-                percent={percent}
-                size="small"
-                status="active"
-                style={{ margin: '4px 0 2px' }}
-              />
-              <div
-                title={stepText}
-                style={{
-                  fontSize: 12,
-                  lineHeight: '16px',
-                  color: 'var(--ant-color-text-tertiary, rgba(0, 0, 0, 0.45))',
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  maxWidth: 230,
-                }}
-              >
-                {stepText}
-              </div>
-            </div>
-          );
-        }
-        return (
-          <Tag color={config.color} icon={config.icon}>
-            {statusLabel(record.status)}
-          </Tag>
-        );
-      },
+      render: (_: React.ReactNode, record: API.CustomClientBuild) =>
+        renderStatus(record),
     },
     {
       title: intl.formatMessage({
@@ -436,135 +565,82 @@ const BuildList: React.FC<BuildListProps> = ({
       }),
       key: 'action',
       search: false,
-      render: (_: any, record: API.CustomClientBuild) => {
-        const files: { name: string; url: string }[] = record.files
-          ? JSON.parse(record.files)
-          : [];
-        const isInProgress =
-          record.status === 'pending' || record.status === 'building';
-        const isTerminal = TERMINAL_STATUSES.includes(record.status);
-        const isRetryable = RETRYABLE_STATUSES.includes(record.status);
-        const actionUrl = githubActionUrl(record);
+      render: (_: any, record: API.CustomClientBuild) => (
+        <Space size={0} separator={<span style={{ color: '#d9d9d9' }}>|</span>}>
+          {renderActionItems(record)}
+        </Space>
+      ),
+    },
+  ];
 
-        return (
-          <Space
-            size={0}
-            separator={<span style={{ color: '#d9d9d9' }}>|</span>}
+  const appNameOf = (record: API.CustomClientBuild) => {
+    try {
+      const custom = record.custom ? JSON.parse(record.custom) : null;
+      const appName = custom?.['app-name'];
+      if (appName) return appName;
+    } catch {
+      // ignore malformed custom payload
+    }
+    return 'RustDesk';
+  };
+
+  const versionOf = (record: API.CustomClientBuild) => {
+    if (record.rustdeskVersion) return record.rustdeskVersion;
+    // 旧记录没有单独存版本，从产物文件名里兜底解析（如 rdservice-1.5.1-x86_64.exe）
+    try {
+      const files: { name: string }[] = record.files
+        ? JSON.parse(record.files)
+        : [];
+      for (const file of files) {
+        const matched = file.name.match(/\d+\.\d+\.\d+/);
+        if (matched) return matched[0];
+      }
+    } catch {
+      // ignore malformed files payload
+    }
+    return '-';
+  };
+
+  // 窄屏用单列卡片式布局：状态、进度和操作上下堆叠，不再横向撑出屏幕。
+  const mobileColumns: ProColumns<API.CustomClientBuild>[] = [
+    {
+      title: intl.formatMessage({
+        id: 'pages.customClient.status',
+        defaultMessage: 'Status',
+      }),
+      key: 'mobileBuild',
+      render: (_: React.ReactNode, record: API.CustomClientBuild) => (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <div
+            style={{
+              fontSize: 12,
+              color: 'var(--ant-color-text-secondary, rgba(0, 0, 0, 0.65))',
+            }}
           >
-            {isInProgress && (
-              <>
-                <Popconfirm
-                  title={intl.formatMessage({
-                    id: 'pages.customClient.cancelBuildConfirm',
-                    defaultMessage:
-                      'Are you sure you want to cancel this build?',
-                  })}
-                  onConfirm={() => handleCancel(record.uuid)}
-                  okText={intl.formatMessage({
-                    id: 'pages.common.confirm',
-                    defaultMessage: 'Yes',
-                  })}
-                  cancelText={intl.formatMessage({
-                    id: 'pages.common.cancel',
-                    defaultMessage: 'No',
-                  })}
-                >
-                  <Button type="link" size="small" danger icon={<StopOutlined />}>
-                    <FormattedMessage
-                      id="pages.customClient.cancelBuild"
-                      defaultMessage="Cancel"
-                    />
-                  </Button>
-                </Popconfirm>
-                <Button
-                  type="link"
-                  size="small"
-                  onClick={() => onProgress(record.uuid)}
-                >
-                  <FormattedMessage
-                    id="pages.customClient.viewProgress"
-                    defaultMessage="Progress"
-                  />
-                </Button>
-              </>
-            )}
-            {isRetryable && (
-              <Button
-                type="link"
-                size="small"
-                icon={<RedoOutlined />}
-                onClick={() => onRetry(record)}
-              >
-                <FormattedMessage
-                  id="pages.customClient.retryBuild"
-                  defaultMessage="Retry"
-                />
-              </Button>
-            )}
-            {actionUrl && (
-              <Button
-                type="link"
-                size="small"
-                icon={<GithubOutlined />}
-                href={actionUrl}
-                target="_blank"
-              >
-                <FormattedMessage
-                  id="pages.customClient.viewOnGithub"
-                  defaultMessage="GitHub"
-                />
-              </Button>
-            )}
-            {record.status === 'completed' &&
-              files.map((file) => (
-                <a
-                  key={file.url}
-                  href={file.url}
-                  target="_blank"
-                  rel="noreferrer"
-                  style={{ marginRight: 8 }}
-                >
-                  {file.name}
-                </a>
-              ))}
-            {isTerminal && (
-              <Popconfirm
-                title={intl.formatMessage({
-                  id: 'pages.customClient.deleteBuildConfirm',
-                  defaultMessage:
-                    'Are you sure you want to delete this build record?',
-                })}
-                onConfirm={() => handleDelete(record.uuid)}
-                okText={intl.formatMessage({
-                  id: 'pages.common.confirm',
-                  defaultMessage: 'Yes',
-                })}
-                cancelText={intl.formatMessage({
-                  id: 'pages.common.cancel',
-                  defaultMessage: 'No',
-                })}
-              >
-                <Button
-                  type="link"
-                  size="small"
-                  danger
-                  icon={<DeleteOutlined />}
-                >
-                  <FormattedMessage
-                    id="pages.common.delete"
-                    defaultMessage="Delete"
-                  />
-                </Button>
-              </Popconfirm>
-            )}
-          </Space>
-        );
-      },
+            {appNameOf(record)} · {record.os} / {record.arch || '-'} ·{' '}
+            {versionOf(record)}
+            {record.createdAt
+              ? ` · ${new Date(record.createdAt).toLocaleString()}`
+              : ''}
+          </div>
+          {renderStatus(record, true)}
+          <div
+            style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              alignItems: 'center',
+              gap: 4,
+            }}
+          >
+            {renderActionItems(record)}
+          </div>
+        </div>
+      ),
     },
   ];
 
   // 所有列默认给一个宽度，用户拖拽表头右边缘即可调整，宽度按列 key 持久化。
-  const mergedColumns = columns.map((col) => {
+  const mergedColumns = (isMobile ? mobileColumns : columns).map((col) => {
     const key = String(col.key ?? col.dataIndex ?? '');
     const width =
       columnWidths[key] ??
@@ -617,13 +693,13 @@ const BuildList: React.FC<BuildListProps> = ({
       components={{ header: { cell: ResizableTitle } }}
       pagination={{
         defaultPageSize: 20,
-        showSizeChanger: true,
-        showQuickJumper: true,
+        showSizeChanger: !isMobile,
+        showQuickJumper: !isMobile,
       }}
-      scroll={{ x: totalWidth }}
+      scroll={isMobile ? undefined : { x: totalWidth }}
       options={{
         density: true,
-        setting: { listsHeight: 400 },
+        setting: isMobile ? false : { listsHeight: 400 },
         fullScreen: false,
         reload: true,
       }}
