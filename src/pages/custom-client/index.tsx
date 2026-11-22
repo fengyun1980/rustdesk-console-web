@@ -131,9 +131,15 @@ const CustomClientPage: React.FC = () => {
   const handleRetry = async (record: API.CustomClientBuild) => {
     try {
       const custom = record.custom ? JSON.parse(record.custom) : {};
-      const result = await submitBuild({
+      await submitBuild({
         os: record.os as any,
-        arch: record.arch ? (record.arch as any) : undefined,
+        // 多系统构建记录里 arch 存的是 all，不是合法的单架构值
+        arch:
+          record.arch && record.arch !== 'all'
+            ? (record.arch as any)
+            : undefined,
+        // 重试时沿用原来的客户端版本，否则会退回到上游默认分支
+        version: record.rustdeskVersion ?? undefined,
         custom,
       });
       msgApi.success(
