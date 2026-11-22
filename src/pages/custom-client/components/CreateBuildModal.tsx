@@ -95,6 +95,7 @@ const CreateBuildModal: React.FC<CreateBuildModalProps> = ({
     React.useState<StrategyConfigValues>({});
   const [releases, setReleases] = React.useState<API.RustdeskRelease[]>([]);
   const osValue = Form.useWatch('os', form);
+  const versionValue = Form.useWatch('version', form);
   const isAllOs = osValue === 'all';
   const availableArchs =
     osValue && OS_ARCH_MAP[osValue]
@@ -435,6 +436,7 @@ const CreateBuildModal: React.FC<CreateBuildModalProps> = ({
           <StrategyConfigStep
             value={strategyConfig}
             onChange={setStrategyConfig}
+            version={versionValue}
           />
         </div>
       )}

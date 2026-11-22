@@ -24,6 +24,7 @@ import {
   getConfigOptionValueMessageId,
   humanizeConfigOptionKey,
 } from '@/pages/strategy/config/i18n';
+import { isOptionSupported } from '@/pages/strategy/config/versionSupport';
 
 export type StrategyConfigMode = 'off' | 'default' | 'override';
 
@@ -37,6 +38,8 @@ export type StrategyConfigValues = Record<string, StrategyConfigItemValue>;
 interface StrategyConfigStepProps {
   value?: StrategyConfigValues;
   onChange?: (value: StrategyConfigValues) => void;
+  /** 所选客户端版本（空表示上游默认分支），用于隐藏该版本不支持的配置项 */
+  version?: string;
 }
 
 const ConfigOptionControl: React.FC<{
@@ -264,6 +267,7 @@ const apiServerFromWsUrl = (url: string | undefined): string => {
 const StrategyConfigStep: React.FC<StrategyConfigStepProps> = ({
   value = {},
   onChange,
+  version,
 }) => {
   const intl = useIntl();
   const [strategyList, setStrategyList] = useState<API.StrategyItem[]>([]);
@@ -341,7 +345,7 @@ const StrategyConfigStep: React.FC<StrategyConfigStepProps> = ({
     const configOptions = strategy?.config_options ?? {};
     const newValues: StrategyConfigValues = {};
     Object.entries(configOptions).forEach(([key, val]) => {
-      if (configOptionsMap[key]) {
+      if (configOptionsMap[key] && isOptionSupported(key, version)) {
         newValues[key] = { mode: 'default', value: val };
       }
     });
@@ -365,11 +369,21 @@ const StrategyConfigStep: React.FC<StrategyConfigStepProps> = ({
     (key) => localValue[key]?.mode === 'default',
   ).length;
 
-  const allCategories = useMemo(() => configCategories, []);
+  const allCategories = useMemo(
+    () =>
+      configCategories.filter((cat) =>
+        getOptionsByCategory(cat.key).some((opt) =>
+          isOptionSupported(opt.key, version),
+        ),
+      ),
+    [version],
+  );
   const tabItems = useMemo(
     () =>
       allCategories.map((cat) => {
-        const options = getOptionsByCategory(cat.key);
+        const options = getOptionsByCategory(cat.key).filter((opt) =>
+          isOptionSupported(opt.key, version),
+        );
         const categoryActiveCount = options.filter(
           (opt) => localValue[opt.key]?.mode !== 'off',
         ).length;
@@ -402,7 +416,7 @@ const StrategyConfigStep: React.FC<StrategyConfigStepProps> = ({
           ),
         };
       }),
-    [allCategories, localValue, handleChange, intl],
+    [allCategories, localValue, handleChange, intl, version],
   );
 
   return (
