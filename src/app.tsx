@@ -76,20 +76,19 @@ const VIEWPORT_ZOOMABLE =
 // 控制台移动端默认禁止缩放；只有网页远控页允许放大对端屏幕。
 function applyZoomPolicy(pathname: string) {
   if (typeof document === 'undefined') return;
-  const allowZoom = pathname.startsWith('/web-client');
-  let meta = document.querySelector<HTMLMetaElement>('meta[name="viewport"]');
-  if (!meta) {
-    meta = document.createElement('meta');
-    meta.name = 'viewport';
-    document.head.appendChild(meta);
+  try {
+    const allowZoom = pathname.startsWith('/web-client');
+    let meta = document.querySelector<HTMLMetaElement>('meta[name="viewport"]');
+    if (!meta) {
+      meta = document.createElement('meta');
+      meta.name = 'viewport';
+      document.head.appendChild(meta);
+    }
+    meta.content = allowZoom ? VIEWPORT_ZOOMABLE : VIEWPORT_LOCKED;
+    document.documentElement.classList.toggle('allow-pinch', allowZoom);
+  } catch {
+    // 缩放策略失败不应影响页面加载
   }
-  meta.content = allowZoom ? VIEWPORT_ZOOMABLE : VIEWPORT_LOCKED;
-  document.documentElement.classList.toggle('allow-pinch', allowZoom);
-}
-
-if (typeof window !== 'undefined') {
-  applyZoomPolicy(window.location.pathname);
-  history.listen(({ location }) => applyZoomPolicy(location.pathname));
 }
 
 export async function getInitialState(): Promise<{
@@ -103,6 +102,7 @@ export async function getInitialState(): Promise<{
   frontendSettings?: API.FrontendSettings;
   setupCompleted?: boolean;
 }> {
+  applyZoomPolicy(history.location.pathname);
   const fetchUserInfo = async () => {
     try {
       const msg = await queryCurrentUser();
@@ -247,6 +247,7 @@ export const layout: RunTimeLayoutConfig = ({
     footerRender: () => <Footer />,
     onPageChange: () => {
       const { location } = history;
+      applyZoomPolicy(location.pathname);
       if (
         !initialState?.currentUser &&
         location.pathname !== loginPath &&
