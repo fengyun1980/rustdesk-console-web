@@ -220,11 +220,8 @@ ol {
   padding: 0 8px;
   text-align: center;
 
+  // 每个产物文件各占一行；名字太长时自然换行，不截断、不省略
   a {
-    display: -webkit-box;
-    overflow: hidden;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
     line-height: 1.8;
     word-break: break-all;
   }
