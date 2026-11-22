@@ -35,7 +35,7 @@ export default {
   'pages.customClient.uuid': 'UUID',
   'pages.customClient.os': '操作系统',
   'pages.customClient.arch': '架构',
-  'pages.customClient.rustdeskVersion': 'RustDesk 版本',
+  'pages.customClient.rustdeskVersion': '客户端版本',
   'pages.customClient.stepCount': '步骤 {completed}/{total}',
   'pages.customClient.cancelBuild': '取消构建',
   'pages.customClient.cancelBuildConfirm':
