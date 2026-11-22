@@ -297,7 +297,14 @@ const BuildList: React.FC<BuildListProps> = ({
       const totalSteps = record.progress?.totalSteps ?? 0;
       const completedSteps = record.progress?.completedSteps ?? 0;
       return (
-        <div style={{ minWidth: mobile ? 0 : 160 }}>
+        <div
+          style={{
+            minWidth: mobile ? 0 : 160,
+            width: mobile ? '100%' : undefined,
+            display: 'flex',
+            flexDirection: 'column',
+          }}
+        >
           <Space size={6} align="center" wrap>
             <Tag color={config.color} icon={config.icon}>
               {statusLabel(record.status)}
@@ -323,7 +330,7 @@ const BuildList: React.FC<BuildListProps> = ({
             percent={percent}
             size="small"
             status="active"
-            style={{ margin: '4px 0 2px' }}
+            style={{ margin: '4px 0 2px', width: '100%', minWidth: 0 }}
           />
           <div
             title={stepText}
