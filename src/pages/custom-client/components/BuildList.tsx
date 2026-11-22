@@ -629,6 +629,7 @@ const BuildList: React.FC<BuildListProps> = ({
               display: 'flex',
               flexWrap: 'wrap',
               alignItems: 'center',
+              justifyContent: 'flex-end',
               gap: 4,
             }}
           >
