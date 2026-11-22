@@ -116,9 +116,19 @@ const LogoManager: React.FC<LogoManagerProps> = ({ open }) => {
               <Space>
                 <span>{filename}</span>
                 {isUploaded ? (
-                  <Tag color="green">Uploaded</Tag>
+                  <Tag color="green">
+                    {intl.formatMessage({
+                      id: 'pages.customClient.logoUploaded',
+                      defaultMessage: 'Uploaded',
+                    })}
+                  </Tag>
                 ) : (
-                  <Tag color="default">Not uploaded</Tag>
+                  <Tag color="default">
+                    {intl.formatMessage({
+                      id: 'pages.customClient.logoNotUploaded',
+                      defaultMessage: 'Not uploaded',
+                    })}
+                  </Tag>
                 )}
               </Space>
             </List.Item>

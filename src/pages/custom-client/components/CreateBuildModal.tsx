@@ -339,7 +339,13 @@ const CreateBuildModal: React.FC<CreateBuildModalProps> = ({
                   })}
                   options={releases.map((release) => ({
                     label: release.prerelease
-                      ? `${release.tag} (beta)`
+                      ? intl.formatMessage(
+                          {
+                            id: 'pages.customClient.betaTag',
+                            defaultMessage: '{tag} (beta)',
+                          },
+                          { tag: release.tag },
+                        )
                       : release.tag,
                     value: release.tag,
                   }))}
