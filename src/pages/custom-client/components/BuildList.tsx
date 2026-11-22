@@ -403,6 +403,7 @@ const BuildList: React.FC<BuildListProps> = ({
         href={file.url}
         target="_blank"
         rel="noreferrer"
+        title={file.name}
         style={{ wordBreak: 'break-all' }}
       >
         {file.name}

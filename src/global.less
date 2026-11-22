@@ -220,10 +220,13 @@ ol {
   padding: 0 8px;
   text-align: center;
 
-  // 每个产物文件各占一行；名字太长时自然换行，不截断、不省略
+  // 每个产物文件一行；单行超长时省略，完整名称见 title
   a {
+    max-width: 100%;
+    overflow: hidden;
     line-height: 1.8;
-    word-break: break-all;
+    white-space: nowrap;
+    text-overflow: ellipsis;
   }
 }
 
