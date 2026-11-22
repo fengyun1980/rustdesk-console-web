@@ -289,59 +289,64 @@ const CreateBuildModal: React.FC<CreateBuildModalProps> = ({
             </Col>
           </Row>
 
-          <Form.Item
-            name="version"
-            label={intl.formatMessage({
-              id: 'pages.customClient.rustdeskVersion',
-              defaultMessage: 'RustDesk Version',
-            })}
-            extra={intl.formatMessage({
-              id: 'pages.customClient.rustdeskVersionHint',
-              defaultMessage:
-                'Leave empty to build the latest upstream branch. Pick a release tag for a stable build.',
-            })}
-          >
-            <Select
-              allowClear
-              showSearch
-              optionFilterProp="label"
-              placeholder={intl.formatMessage({
-                id: 'pages.customClient.rustdeskVersionLatest',
-                defaultMessage: 'Latest (upstream default branch)',
-              })}
-              options={releases.map((release) => ({
-                label: release.prerelease
-                  ? `${release.tag} (beta)`
-                  : release.tag,
-                value: release.tag,
-              }))}
-            />
-          </Form.Item>
-
-          <Form.Item
-            name="app-name"
-            label={intl.formatMessage({
-              id: 'pages.customClient.appName',
-              defaultMessage: 'Application Name',
-            })}
-            rules={[
-              {
-                pattern: /^[a-zA-Z]+$/,
-                message: intl.formatMessage({
-                  id: 'pages.customClient.appNameHint',
-                  defaultMessage: 'Only English letters allowed',
-                }),
-              },
-            ]}
-          >
-            <Input
-              prefix={<AppstoreOutlined />}
-              placeholder={intl.formatMessage({
-                id: 'pages.customClient.appNamePlaceholder',
-                defaultMessage: 'e.g. my-rustdesk',
-              })}
-            />
-          </Form.Item>
+          <Row gutter={16}>
+            <Col xs={24} sm={12}>
+              <Form.Item
+                name="app-name"
+                label={intl.formatMessage({
+                  id: 'pages.customClient.appName',
+                  defaultMessage: 'Application Name',
+                })}
+                rules={[
+                  {
+                    pattern: /^[a-zA-Z]+$/,
+                    message: intl.formatMessage({
+                      id: 'pages.customClient.appNameHint',
+                      defaultMessage: 'Only English letters allowed',
+                    }),
+                  },
+                ]}
+              >
+                <Input
+                  prefix={<AppstoreOutlined />}
+                  placeholder={intl.formatMessage({
+                    id: 'pages.customClient.appNamePlaceholder',
+                    defaultMessage: 'e.g. my-rustdesk',
+                  })}
+                />
+              </Form.Item>
+            </Col>
+            <Col xs={24} sm={12}>
+              <Form.Item
+                name="version"
+                label={intl.formatMessage({
+                  id: 'pages.customClient.rustdeskVersion',
+                  defaultMessage: 'RustDesk Version',
+                })}
+                extra={intl.formatMessage({
+                  id: 'pages.customClient.rustdeskVersionHint',
+                  defaultMessage:
+                    'Leave empty to build the latest upstream branch. Pick a release tag for a stable build.',
+                })}
+              >
+                <Select
+                  allowClear
+                  showSearch
+                  optionFilterProp="label"
+                  placeholder={intl.formatMessage({
+                    id: 'pages.customClient.rustdeskVersionLatest',
+                    defaultMessage: 'Latest (upstream default branch)',
+                  })}
+                  options={releases.map((release) => ({
+                    label: release.prerelease
+                      ? `${release.tag} (beta)`
+                      : release.tag,
+                    value: release.tag,
+                  }))}
+                />
+              </Form.Item>
+            </Col>
+          </Row>
 
           {/* Section: Custom Configuration */}
           <Divider titlePlacement="left" plain>
