@@ -294,6 +294,12 @@ ol {
 // 避免嵌套滚动把上下的滑动手势吃掉。
 @media (max-width: 768px) {
   .custom-client-build-table {
+    // 卡片布局下固定表格宽度，避免超长的任务名把表格撑宽后溢出
+    table {
+      width: 100%;
+      table-layout: fixed;
+    }
+
     .ant-table,
     .ant-table-content,
     .ant-table-body {

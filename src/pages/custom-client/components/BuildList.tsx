@@ -321,9 +321,11 @@ const BuildList: React.FC<BuildListProps> = ({
         <div
           style={{
             minWidth: mobile ? 0 : 160,
+            maxWidth: '100%',
             width: mobile ? '100%' : undefined,
             display: 'flex',
             flexDirection: 'column',
+            overflow: mobile ? 'hidden' : undefined,
           }}
         >
           {mobile ? (
@@ -364,6 +366,8 @@ const BuildList: React.FC<BuildListProps> = ({
               whiteSpace: 'nowrap',
               overflow: 'hidden',
               textOverflow: 'ellipsis',
+              display: 'block',
+              width: mobile ? '100%' : undefined,
               maxWidth: mobile ? '100%' : 230,
             }}
           >
