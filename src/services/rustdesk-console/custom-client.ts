@@ -34,6 +34,16 @@ export async function getBuildFiles(uuid: string) {
   });
 }
 
+export async function getRustdeskReleases() {
+  return request<API.RustdeskRelease[]>(
+    '/api/custom-client/rustdesk-releases',
+    {
+      method: 'GET',
+      skipErrorHandler: true,
+    },
+  );
+}
+
 export async function getBuildProgress(uuid: string) {
   return request<API.CustomClientBuildProgress>(
     `/api/custom-client/builds/${uuid}/progress`,

@@ -103,6 +103,7 @@ const CustomClientPage: React.FC = () => {
       const result = await submitBuild({
         os: values.os,
         arch: values.os === 'all' ? undefined : values.arch,
+        version: values.version || undefined,
         custom,
       });
       msgApi.success(

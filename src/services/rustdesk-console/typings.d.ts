@@ -1258,7 +1258,15 @@ declare namespace API {
   type SubmitCustomClientBuildParams = {
     os: 'windows' | 'linux' | 'macos' | 'android' | 'ios' | 'all';
     arch?: 'x86_64' | 'aarch64' | 'x86' | 'armv7' | 'universal';
+    version?: string;
     custom?: CustomClientBuildCustom;
+  };
+
+  type RustdeskRelease = {
+    tag: string;
+    name: string;
+    publishedAt: string;
+    prerelease: boolean;
   };
 
   type SubmitCustomClientBuildResult = {
