@@ -296,6 +296,27 @@ const BuildList: React.FC<BuildListProps> = ({
         });
       const totalSteps = record.progress?.totalSteps ?? 0;
       const completedSteps = record.progress?.completedSteps ?? 0;
+      const statusTag = (
+        <Tag color={config.color} icon={config.icon}>
+          {statusLabel(record.status)}
+        </Tag>
+      );
+      const stepCount = totalSteps > 0 && (
+        <span
+          style={{
+            fontSize: 12,
+            color: 'var(--ant-color-primary, #1677ff)',
+          }}
+        >
+          {intl.formatMessage(
+            {
+              id: 'pages.customClient.stepCount',
+              defaultMessage: 'Step: {completed}/{total}',
+            },
+            { completed: completedSteps, total: totalSteps },
+          )}
+        </span>
+      );
       return (
         <div
           style={{
@@ -305,35 +326,32 @@ const BuildList: React.FC<BuildListProps> = ({
             flexDirection: 'column',
           }}
         >
-          <Space size={12} align="center" wrap>
-            <Tag color={config.color} icon={config.icon}>
-              {statusLabel(record.status)}
-            </Tag>
-            {totalSteps > 0 && (
-              <span
-                style={{
-                  fontSize: 12,
-                  color: 'var(--ant-color-primary, #1677ff)',
-                }}
-              >
-                {intl.formatMessage(
-                  {
-                    id: 'pages.customClient.stepCount',
-                    defaultMessage: 'Step: {completed}/{total}',
-                  },
-                  { completed: completedSteps, total: totalSteps },
-                )}
-              </span>
-            )}
-          </Space>
+          {mobile ? (
+            // 窄屏：状态靠左、步骤靠右，进度条和步骤名各占一行。
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: 8,
+              }}
+            >
+              {statusTag}
+              {stepCount}
+            </div>
+          ) : (
+            <Space size={12} align="center" wrap>
+              {statusTag}
+              {stepCount}
+            </Space>
+          )}
           <Progress
             percent={percent}
             size="small"
             status="active"
             style={{
-              margin: '4px 0 2px',
+              margin: '6px 0 2px',
               width: '100%',
-              maxWidth: mobile ? 240 : undefined,
               minWidth: 0,
             }}
           />
