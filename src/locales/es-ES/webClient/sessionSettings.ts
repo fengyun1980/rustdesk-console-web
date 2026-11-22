@@ -122,6 +122,14 @@ export default {
     'ID o perfil de servidor no válido. No se admiten direcciones IP, URL ni servidores alternativos.',
   'webClient.error.identity':
     'No se pudo verificar la identidad remota. Se ha cerrado la conexión.',
+  'webClient.error.identityLicense':
+    'Fallo de identidad: la clave del servidor no coincide. La clave pública configurada en la consola no es la que usa hbbs.',
+  'webClient.error.identityRelay':
+    'Fallo de identidad: la respuesta del relay no incluye la identidad firmada del dispositivo. Probablemente hbbs no tiene clave privada para firmar.',
+  'webClient.error.identityServer':
+    'Fallo de identidad: no se pudo verificar la identidad del dispositivo con la clave pública configurada. Revisa la clave pública del servidor en los ajustes de cliente web.',
+  'webClient.error.identityPeer':
+    'Fallo de identidad: no se pudo verificar la identidad firmada del dispositivo. La clave del dispositivo pudo cambiar o la versión del cliente es incompatible.',
   'webClient.error.encryption':
     'No se pudo inicializar la sesión segura o verificar los mensajes.',
   'webClient.error.password':

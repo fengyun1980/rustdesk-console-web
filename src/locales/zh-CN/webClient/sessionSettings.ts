@@ -110,6 +110,14 @@ export default {
   'webClient.error.configuration':
     '设备 ID 或服务器配置无效；不支持 IP 直连、URL 或指定其他服务器。',
   'webClient.error.identity': '远端身份校验失败，已终止连接。',
+  'webClient.error.identityLicense':
+    '身份校验失败：服务器密钥不匹配。控制台配置的服务器公钥与 hbbs 当前密钥不一致，请核对后重试。',
+  'webClient.error.identityRelay':
+    '身份校验失败：中继响应缺少设备签名身份。通常是 hbbs 未加载私钥、无法为设备身份签名导致。',
+  'webClient.error.identityServer':
+    '身份校验失败：无法用控制台配置的服务器公钥验证 hbbs 返回的设备身份，请核对网页远控设置中的服务器公钥。',
+  'webClient.error.identityPeer':
+    '身份校验失败：设备端返回的签名身份无法验证，可能是设备密钥已变更或客户端版本不兼容。',
   'webClient.error.encryption': '安全会话初始化或消息验证失败。',
   'webClient.error.password': '被控设备拒绝了该密码，请重试。',
   'webClient.error.denied': '被控端拒绝或结束了本次会话。',

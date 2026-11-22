@@ -16,6 +16,7 @@ import {
   decodeServerKey,
   derivePasswordHash,
   type KxVersion,
+  type VerifiedIdentity,
   verifyIdentity,
 } from './crypto';
 import {
@@ -366,7 +367,7 @@ export class RemoteSession {
         const failure = response.punchHoleResponse;
         if (!failure) throw new SessionError('protocol');
         if (failure.failure === hbb.PunchHoleResponse.Failure.LICENSE_MISMATCH)
-          throw new SessionError('identity');
+          throw new SessionError('identityLicense');
         if (
           failure.failure === hbb.PunchHoleResponse.Failure.LICENSE_OVERUSE ||
           failure.otherFailure
@@ -376,13 +377,20 @@ export class RemoteSession {
       }
       if (relay.refuseReason) throw new SessionError('denied');
       if (!relay.uuid || !relay.version || !relay.pk)
-        throw new SessionError('identity');
+        throw new SessionError('identityRelay');
       validateAdvertisedRelay(relay.relayServer || '', profile.relayServerUrl);
-      const peerIdentity = verifyIdentity(
-        relay.pk,
-        decodeServerKey(profile.serverPublicKey),
-        this.targetId,
-      );
+      let peerIdentity: VerifiedIdentity;
+      try {
+        peerIdentity = verifyIdentity(
+          relay.pk,
+          decodeServerKey(profile.serverPublicKey),
+          this.targetId,
+        );
+      } catch (error) {
+        if (error instanceof SessionError && error.code === 'configuration')
+          throw error;
+        throw new SessionError('identityServer');
+      }
       this.peerKey = Array.from(peerIdentity.publicKey, (value) =>
         value.toString(16).padStart(2, '0'),
       ).join('');
@@ -486,13 +494,14 @@ export class RemoteSession {
       this.transport = transport;
       const signed = hbb.Message.decode(await transport.receive()).signedId?.id;
       this.current(generation);
-      if (!signed) throw new SessionError('identity');
+      if (!signed) throw new SessionError('identityPeer');
       // Only the peer-signed session offer negotiates KX, not relay metadata.
-      const offer = verifyIdentity(
-        signed,
-        peerIdentity.publicKey,
-        this.targetId,
-      );
+      let offer: VerifiedIdentity;
+      try {
+        offer = verifyIdentity(signed, peerIdentity.publicKey, this.targetId);
+      } catch {
+        throw new SessionError('identityPeer');
+      }
       const exchange = createKeyExchange(offer);
       try {
         transport.send(

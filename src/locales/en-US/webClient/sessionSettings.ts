@@ -119,6 +119,14 @@ export default {
     'Invalid ID or server profile. IP addresses, URLs and server overrides are unsupported.',
   'webClient.error.identity':
     'Remote identity verification failed. The connection was closed.',
+  'webClient.error.identityLicense':
+    'Identity verification failed: the server key does not match. The public key configured in the console differs from the key hbbs is using.',
+  'webClient.error.identityRelay':
+    'Identity verification failed: the relay response carried no signed device identity. hbbs probably has no private key loaded, so it cannot sign device identities.',
+  'webClient.error.identityServer':
+    'Identity verification failed: the device identity returned by hbbs could not be verified with the configured server public key. Check the server public key in Web Client settings.',
+  'webClient.error.identityPeer':
+    'Identity verification failed: the signed identity sent by the device could not be verified. The device key may have changed, or the client version is incompatible.',
   'webClient.error.encryption':
     'Secure session initialization or message verification failed.',
   'webClient.error.password':

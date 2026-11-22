@@ -125,6 +125,14 @@ export default {
     'ID ou configuration de serveur invalide. Les adresses IP, URL et autres serveurs ne sont pas pris en charge.',
   'webClient.error.identity':
     'Échec de la vérification d’identité distante. La connexion a été fermée.',
+  'webClient.error.identityLicense':
+    'Échec d’identité : la clé du serveur ne correspond pas. La clé publique configurée dans la console diffère de celle utilisée par hbbs.',
+  'webClient.error.identityRelay':
+    'Échec d’identité : la réponse du relais ne contient pas l’identité signée de l’appareil. hbbs n’a probablement pas de clé privée pour signer.',
+  'webClient.error.identityServer':
+    'Échec d’identité : impossible de vérifier l’identité renvoyée par hbbs avec la clé publique configurée. Vérifiez la clé publique du serveur dans les paramètres du client web.',
+  'webClient.error.identityPeer':
+    'Échec d’identité : l’identité signée de l’appareil n’a pas pu être vérifiée. La clé de l’appareil a peut-être changé, ou la version du client est incompatible.',
   'webClient.error.encryption':
     'Échec de l’initialisation sécurisée ou de la vérification des messages.',
   'webClient.error.password':

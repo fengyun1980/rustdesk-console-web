@@ -117,6 +117,14 @@ export default {
     'ID ou configuração de servidor inválidos. Não são aceitos IPs, URLs ou outros servidores.',
   'webClient.error.identity':
     'Falha na verificação da identidade remota. A conexão foi encerrada.',
+  'webClient.error.identityLicense':
+    'Falha de identidade: a chave do servidor não corresponde. A chave pública configurada no console é diferente da usada pelo hbbs.',
+  'webClient.error.identityRelay':
+    'Falha de identidade: a resposta do relay não trouxe a identidade assinada do dispositivo. Provavelmente o hbbs não tem chave privada para assinar.',
+  'webClient.error.identityServer':
+    'Falha de identidade: não foi possível verificar a identidade retornada pelo hbbs com a chave pública configurada. Verifique a chave pública do servidor nas configurações do cliente web.',
+  'webClient.error.identityPeer':
+    'Falha de identidade: não foi possível verificar a identidade assinada do dispositivo. A chave do dispositivo pode ter mudado ou a versão do cliente é incompatível.',
   'webClient.error.encryption':
     'Falha ao iniciar a sessão segura ou verificar mensagens.',
   'webClient.error.password':
