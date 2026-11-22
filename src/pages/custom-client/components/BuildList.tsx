@@ -286,24 +286,23 @@ const BuildList: React.FC<BuildListProps> = ({
             });
           const totalSteps = record.progress?.totalSteps ?? 0;
           const completedSteps = record.progress?.completedSteps ?? 0;
-          const stepCount =
-            totalSteps > 0
-              ? intl.formatMessage(
-                  {
-                    id: 'pages.customClient.stepCount',
-                    defaultMessage: 'Step {completed}/{total}',
-                  },
-                  { completed: completedSteps, total: totalSteps },
-                )
-              : '';
-          const stepLine = stepCount
-            ? `${stepCount} · ${stepText}`
-            : stepText;
           return (
             <div style={{ minWidth: 160 }}>
-              <Tag color={config.color} icon={config.icon}>
-                {statusLabel(record.status)}
-              </Tag>
+              <Space size={6} align="center">
+                <Tag color={config.color} icon={config.icon}>
+                  {statusLabel(record.status)}
+                </Tag>
+                {totalSteps > 0 && (
+                  <span
+                    style={{
+                      fontSize: 12,
+                      color: 'var(--ant-color-text-tertiary, rgba(0, 0, 0, 0.45))',
+                    }}
+                  >
+                    {completedSteps}/{totalSteps}
+                  </span>
+                )}
+              </Space>
               <Progress
                 percent={percent}
                 size="small"
@@ -311,7 +310,7 @@ const BuildList: React.FC<BuildListProps> = ({
                 style={{ margin: '4px 0 2px' }}
               />
               <div
-                title={stepLine}
+                title={stepText}
                 style={{
                   fontSize: 12,
                   lineHeight: '16px',
@@ -322,7 +321,7 @@ const BuildList: React.FC<BuildListProps> = ({
                   maxWidth: 230,
                 }}
               >
-                {stepLine}
+                {stepText}
               </div>
             </div>
           );

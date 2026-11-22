@@ -1,6 +1,6 @@
 export default {
   'pages.customClients.createdAt': 'Criado em',
-  'pages.customClient.rustdeskVersion': 'Versão do RustDesk',
+  'pages.customClient.rustdeskVersion': 'Versão do cliente',
   'pages.customClient.stepCount': 'Etapa {completed}/{total}',
   'pages.customClient.cancelBuild': 'Cancelar compilação',
   'pages.customClient.cancelBuildConfirm':

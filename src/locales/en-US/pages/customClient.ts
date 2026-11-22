@@ -35,7 +35,7 @@ export default {
   'pages.customClient.uuid': 'UUID',
   'pages.customClient.os': 'Operating System',
   'pages.customClient.arch': 'Architecture',
-  'pages.customClient.rustdeskVersion': 'RustDesk Version',
+  'pages.customClient.rustdeskVersion': 'Client Version',
   'pages.customClient.stepCount': 'Step {completed}/{total}',
   'pages.customClient.cancelBuild': 'Cancel Build',
   'pages.customClient.cancelBuildConfirm':

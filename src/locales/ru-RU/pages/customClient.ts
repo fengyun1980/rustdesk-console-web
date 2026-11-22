@@ -1,6 +1,6 @@
 export default {
   'pages.customClients.createdAt': 'Дата создания',
-  'pages.customClient.rustdeskVersion': 'Версия RustDesk',
+  'pages.customClient.rustdeskVersion': 'Версия клиента',
   'pages.customClient.stepCount': 'Шаг {completed}/{total}',
   'pages.customClient.cancelBuild': 'Отменить сборку',
   'pages.customClient.cancelBuildConfirm':
