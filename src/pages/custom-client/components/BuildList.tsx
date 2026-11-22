@@ -654,15 +654,7 @@ const BuildList: React.FC<BuildListProps> = ({
               : ''}
           </div>
           {renderStatus(record, true)}
-          <div
-            style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              alignItems: 'center',
-              justifyContent: 'flex-end',
-              gap: 4,
-            }}
-          >
+          <div className="custom-client-mobile-actions">
             {renderActionItems(record)}
           </div>
         </div>
