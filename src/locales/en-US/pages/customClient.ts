@@ -37,6 +37,11 @@ export default {
   'pages.customClient.arch': 'Architecture',
   'pages.customClient.rustdeskVersion': 'RustDesk Version',
   'pages.customClient.stepCount': 'Step {completed}/{total}',
+  'pages.customClient.cancelBuild': 'Cancel Build',
+  'pages.customClient.cancelBuildConfirm':
+    'Are you sure you want to cancel this build? You will need to build again.',
+  'pages.customClient.cancelBuildSuccess': 'Build cancelled',
+  'pages.customClient.cancelBuildFailed': 'Failed to cancel build',
   'pages.customClient.appName': 'Application Name',
   'pages.customClient.appNamePlaceholder': 'e.g. my-rustdesk',
   'pages.customClient.appNameHint': 'Only English letters allowed',

@@ -27,6 +27,16 @@ export async function deleteBuild(uuid: string) {
   });
 }
 
+export async function cancelBuild(uuid: string) {
+  return request<{ status: string }>(
+    `/api/custom-client/builds/${uuid}/cancel`,
+    {
+      method: 'POST',
+      skipErrorHandler: true,
+    },
+  );
+}
+
 export async function getBuildFiles(uuid: string) {
   return request<string[]>(`/api/custom-client/builds/${uuid}/files`, {
     method: 'GET',

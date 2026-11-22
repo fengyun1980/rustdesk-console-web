@@ -7,6 +7,7 @@ import {
   MinusCircleOutlined,
   PlusOutlined,
   RedoOutlined,
+  StopOutlined,
   WarningOutlined,
 } from '@ant-design/icons';
 import type {
@@ -19,6 +20,7 @@ import { FormattedMessage, useIntl } from '@umijs/max';
 import { App, Button, Popconfirm, Progress, Space, Tag, Typography } from 'antd';
 import React from 'react';
 import {
+  cancelBuild,
   deleteBuild,
   getBuildList,
   getCustomClientSettings,
@@ -175,6 +177,26 @@ const BuildList: React.FC<BuildListProps> = ({
         intl.formatMessage({
           id: 'pages.customClient.deleteFailed',
           defaultMessage: 'Failed to delete build record',
+        }),
+      );
+    }
+  };
+
+  const handleCancel = async (uuid: string) => {
+    try {
+      await cancelBuild(uuid);
+      msgApi.success(
+        intl.formatMessage({
+          id: 'pages.customClient.cancelBuildSuccess',
+          defaultMessage: 'Build cancelled',
+        }),
+      );
+      actionRef.current?.reload();
+    } catch {
+      msgApi.error(
+        intl.formatMessage({
+          id: 'pages.customClient.cancelBuildFailed',
+          defaultMessage: 'Failed to cancel build',
         }),
       );
     }
@@ -347,16 +369,41 @@ const BuildList: React.FC<BuildListProps> = ({
             separator={<span style={{ color: '#d9d9d9' }}>|</span>}
           >
             {isInProgress && (
-              <Button
-                type="link"
-                size="small"
-                onClick={() => onProgress(record.uuid)}
-              >
-                <FormattedMessage
-                  id="pages.customClient.viewProgress"
-                  defaultMessage="Progress"
-                />
-              </Button>
+              <>
+                <Popconfirm
+                  title={intl.formatMessage({
+                    id: 'pages.customClient.cancelBuildConfirm',
+                    defaultMessage:
+                      'Are you sure you want to cancel this build?',
+                  })}
+                  onConfirm={() => handleCancel(record.uuid)}
+                  okText={intl.formatMessage({
+                    id: 'pages.common.confirm',
+                    defaultMessage: 'Yes',
+                  })}
+                  cancelText={intl.formatMessage({
+                    id: 'pages.common.cancel',
+                    defaultMessage: 'No',
+                  })}
+                >
+                  <Button type="link" size="small" danger icon={<StopOutlined />}>
+                    <FormattedMessage
+                      id="pages.customClient.cancelBuild"
+                      defaultMessage="Cancel"
+                    />
+                  </Button>
+                </Popconfirm>
+                <Button
+                  type="link"
+                  size="small"
+                  onClick={() => onProgress(record.uuid)}
+                >
+                  <FormattedMessage
+                    id="pages.customClient.viewProgress"
+                    defaultMessage="Progress"
+                  />
+                </Button>
+              </>
             )}
             {isRetryable && (
               <Button
