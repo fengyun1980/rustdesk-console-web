@@ -262,6 +262,21 @@ const BuildList: React.FC<BuildListProps> = ({
               id: 'pages.customClient.waitingGithub',
               defaultMessage: 'Waiting for GitHub…',
             });
+          const totalSteps = record.progress?.totalSteps ?? 0;
+          const completedSteps = record.progress?.completedSteps ?? 0;
+          const stepCount =
+            totalSteps > 0
+              ? intl.formatMessage(
+                  {
+                    id: 'pages.customClient.stepCount',
+                    defaultMessage: 'Step {completed}/{total}',
+                  },
+                  { completed: completedSteps, total: totalSteps },
+                )
+              : '';
+          const stepLine = stepCount
+            ? `${stepCount} · ${stepText}`
+            : stepText;
           return (
             <div style={{ minWidth: 160 }}>
               <Tag color={config.color} icon={config.icon}>
@@ -274,7 +289,7 @@ const BuildList: React.FC<BuildListProps> = ({
                 style={{ margin: '4px 0 2px' }}
               />
               <div
-                title={stepText}
+                title={stepLine}
                 style={{
                   fontSize: 12,
                   lineHeight: '16px',
@@ -282,10 +297,10 @@ const BuildList: React.FC<BuildListProps> = ({
                   whiteSpace: 'nowrap',
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
-                  maxWidth: 170,
+                  maxWidth: 230,
                 }}
               >
-                {stepText}
+                {stepLine}
               </div>
             </div>
           );
