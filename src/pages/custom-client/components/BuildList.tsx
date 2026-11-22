@@ -730,6 +730,7 @@ const BuildList: React.FC<BuildListProps> = ({
 
   return (
     <ProTable<API.CustomClientBuild>
+      className="custom-client-build-table"
       headerTitle={
         <Title level={5} style={{ margin: 0 }}>
           <FormattedMessage

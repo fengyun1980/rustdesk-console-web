@@ -264,3 +264,20 @@ ol {
     transform: translateY(0) scale(0.96);
   }
 }
+
+// 构建历史在手机上已是卡片布局，关闭表格自身的横向滚动容器，
+// 避免嵌套滚动把上下的滑动手势吃掉。
+@media (max-width: 768px) {
+  .custom-client-build-table {
+    .ant-table,
+    .ant-table-content,
+    .ant-table-body {
+      overflow: clip;
+      -webkit-overflow-scrolling: auto;
+    }
+
+    td {
+      white-space: normal;
+    }
+  }
+}
