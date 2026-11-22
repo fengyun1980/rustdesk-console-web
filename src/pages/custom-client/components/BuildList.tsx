@@ -297,6 +297,26 @@ const BuildList: React.FC<BuildListProps> = ({
     },
     {
       title: intl.formatMessage({
+        id: 'pages.customClient.appName',
+        defaultMessage: 'Application Name',
+      }),
+      key: 'appName',
+      width: 140,
+      ellipsis: true,
+      render: (_: React.ReactNode, record: API.CustomClientBuild) => {
+        // 应用名称存在构建记录的 custom JSON 里，未设置时客户端默认使用 RustDesk
+        try {
+          const custom = record.custom ? JSON.parse(record.custom) : null;
+          const appName = custom?.['app-name'];
+          if (appName) return appName;
+        } catch {
+          // ignore malformed custom payload
+        }
+        return 'RustDesk';
+      },
+    },
+    {
+      title: intl.formatMessage({
         id: 'pages.customClient.rustdeskVersion',
         defaultMessage: 'RustDesk Version',
       }),
