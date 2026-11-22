@@ -139,7 +139,6 @@ const BuildList: React.FC<BuildListProps> = ({
   const screens = Grid.useBreakpoint();
   // 窄屏（手机）只保留一列堆叠展示，避免宽表格横向溢出
   const isMobile = screens.md === false;
-  const pollRef = React.useRef<ReturnType<typeof setInterval> | null>(null);
   const [generatorRepo, setGeneratorRepo] = React.useState<string>(
     'databk/rustdesk-generator',
   );
@@ -211,26 +210,6 @@ const BuildList: React.FC<BuildListProps> = ({
     };
     return map[status] || status;
   };
-
-  const managePolling = (records: API.CustomClientBuild[]) => {
-    const hasPending = records.some(
-      (r) => r.status === 'pending' || r.status === 'building',
-    );
-    if (hasPending && !pollRef.current) {
-      pollRef.current = setInterval(() => {
-        actionRef.current?.reload();
-      }, 5000);
-    } else if (!hasPending && pollRef.current) {
-      clearInterval(pollRef.current);
-      pollRef.current = null;
-    }
-  };
-
-  React.useEffect(() => {
-    return () => {
-      if (pollRef.current) clearInterval(pollRef.current);
-    };
-  }, []);
 
   const handleDelete = async (uuid: string) => {
     try {
@@ -787,7 +766,6 @@ const BuildList: React.FC<BuildListProps> = ({
       request={async () => {
         try {
           const records = await getBuildList();
-          managePolling(records);
           return {
             data: records,
             success: true,
@@ -799,6 +777,14 @@ const BuildList: React.FC<BuildListProps> = ({
           };
         }
       }}
+      // 有构建在进行时静默轮询（ProTable 的 polling 不会展示加载遮罩），否则 0 停止
+      polling={(data) =>
+        data.some(
+          (r) => r.status === 'pending' || r.status === 'building',
+        )
+          ? 5000
+          : 0
+      }
     />
   );
 };
