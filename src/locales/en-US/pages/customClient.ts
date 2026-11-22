@@ -35,6 +35,7 @@ export default {
   'pages.customClient.uuid': 'UUID',
   'pages.customClient.os': 'Operating System',
   'pages.customClient.arch': 'Architecture',
+  'pages.customClient.rustdeskVersion': 'RustDesk Version',
   'pages.customClient.appName': 'Application Name',
   'pages.customClient.appNamePlaceholder': 'e.g. my-rustdesk',
   'pages.customClient.appNameHint': 'Only English letters allowed',

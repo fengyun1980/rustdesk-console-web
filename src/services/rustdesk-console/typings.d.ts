@@ -1280,6 +1280,7 @@ declare namespace API {
     userGuid: string;
     os: string;
     arch: string;
+    rustdeskVersion?: string | null;
     custom: string | null;
     status: BuildStatus;
 

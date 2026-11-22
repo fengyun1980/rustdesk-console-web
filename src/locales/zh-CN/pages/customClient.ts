@@ -35,6 +35,7 @@ export default {
   'pages.customClient.uuid': 'UUID',
   'pages.customClient.os': '操作系统',
   'pages.customClient.arch': '架构',
+  'pages.customClient.rustdeskVersion': 'RustDesk 版本',
   'pages.customClient.appName': '应用名称',
   'pages.customClient.appNamePlaceholder': '例如 my-rustdesk',
   'pages.customClient.appNameHint': '仅允许英文字母',

@@ -217,6 +217,31 @@ const BuildList: React.FC<BuildListProps> = ({
     },
     {
       title: intl.formatMessage({
+        id: 'pages.customClient.rustdeskVersion',
+        defaultMessage: 'RustDesk Version',
+      }),
+      dataIndex: 'rustdeskVersion',
+      key: 'rustdeskVersion',
+      width: 130,
+      render: (_: React.ReactNode, record: API.CustomClientBuild) => {
+        if (record.rustdeskVersion) return record.rustdeskVersion;
+        // 旧记录没有单独存版本，从产物文件名里兜底解析（如 rdservice-1.5.1-x86_64.exe）
+        try {
+          const files: { name: string }[] = record.files
+            ? JSON.parse(record.files)
+            : [];
+          for (const file of files) {
+            const matched = file.name.match(/\d+\.\d+\.\d+/);
+            if (matched) return matched[0];
+          }
+        } catch {
+          // ignore malformed files payload
+        }
+        return '-';
+      },
+    },
+    {
+      title: intl.formatMessage({
         id: 'pages.customClient.status',
         defaultMessage: 'Status',
       }),
