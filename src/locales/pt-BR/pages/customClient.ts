@@ -1,7 +1,7 @@
 export default {
   'pages.customClients.createdAt': 'Criado em',
   'pages.customClient.rustdeskVersion': 'Versão do cliente',
-  'pages.customClient.stepCount': 'Etapa {completed}/{total}',
+  'pages.customClient.stepCount': 'Etapa: {completed}/{total}',
   'pages.customClient.cancelBuild': 'Cancelar compilação',
   'pages.customClient.cancelBuildConfirm':
     'Tem certeza de que deseja cancelar esta compilação? Será necessário compilar novamente.',

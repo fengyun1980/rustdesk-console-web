@@ -39,7 +39,7 @@ export default {
   'pages.customClient.os': 'Sistema operativo',
   'pages.customClient.arch': 'Arquitectura',
   'pages.customClient.rustdeskVersion': 'Versión del cliente',
-  'pages.customClient.stepCount': 'Paso {completed}/{total}',
+  'pages.customClient.stepCount': 'Paso: {completed}/{total}',
   'pages.customClient.cancelBuild': 'Cancelar compilación',
   'pages.customClient.cancelBuildConfirm':
     '¿Seguro que quieres cancelar esta compilación? Tendrás que compilar de nuevo.',
