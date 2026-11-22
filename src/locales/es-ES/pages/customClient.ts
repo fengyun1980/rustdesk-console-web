@@ -40,6 +40,12 @@ export default {
   'pages.customClient.arch': 'Arquitectura',
   'pages.customClient.rustdeskVersion': 'Versión de RustDesk',
   'pages.customClient.stepCount': 'Paso {completed}/{total}',
+  'pages.customClient.cancelBuild': 'Cancelar compilación',
+  'pages.customClient.cancelBuildConfirm':
+    '¿Seguro que quieres cancelar esta compilación? Tendrás que compilar de nuevo.',
+  'pages.customClient.cancelBuildSuccess': 'Compilación cancelada',
+  'pages.customClient.cancelBuildFailed':
+    'No se pudo cancelar la compilación',
   'pages.customClient.appName': 'Nombre de la aplicación',
   'pages.customClient.appNamePlaceholder': 'p. ej. my-rustdesk',
   'pages.customClient.appNameHint':
