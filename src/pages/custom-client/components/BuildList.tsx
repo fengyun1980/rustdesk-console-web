@@ -354,10 +354,16 @@ const BuildList: React.FC<BuildListProps> = ({
                   <span
                     style={{
                       fontSize: 12,
-                      color: 'var(--ant-color-text-tertiary, rgba(0, 0, 0, 0.45))',
+                      color: 'var(--ant-color-primary, #1677ff)',
                     }}
                   >
-                    {completedSteps}/{totalSteps}
+                    {intl.formatMessage(
+                      {
+                        id: 'pages.customClient.stepCount',
+                        defaultMessage: 'Step: {completed}/{total}',
+                      },
+                      { completed: completedSteps, total: totalSteps },
+                    )}
                   </span>
                 )}
               </Space>

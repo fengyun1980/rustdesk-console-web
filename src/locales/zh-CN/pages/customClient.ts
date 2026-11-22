@@ -36,7 +36,7 @@ export default {
   'pages.customClient.os': '操作系统',
   'pages.customClient.arch': '架构',
   'pages.customClient.rustdeskVersion': '客户端版本',
-  'pages.customClient.stepCount': '步骤 {completed}/{total}',
+  'pages.customClient.stepCount': '步骤: {completed}/{total}',
   'pages.customClient.cancelBuild': '取消构建',
   'pages.customClient.cancelBuildConfirm':
     '确定要取消此构建吗？取消后需要重新构建。',
