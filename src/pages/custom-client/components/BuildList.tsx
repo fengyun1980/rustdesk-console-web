@@ -66,7 +66,7 @@ const statusConfig: Record<string, { color: string; icon: React.ReactNode }> = {
   action_required: { color: 'warning', icon: <WarningOutlined /> },
 };
 
-const COLUMNS_STATE_KEY = 'custom_client_build_list_columns_state_v2';
+const COLUMNS_STATE_KEY = 'custom_client_build_list_columns_state_v3';
 const COLUMN_WIDTHS_KEY = 'custom_client_build_list_column_widths_v1';
 
 const readColumnWidths = (): Record<string, number> => {
@@ -322,6 +322,18 @@ const BuildList: React.FC<BuildListProps> = ({
     },
     {
       title: intl.formatMessage({
+        id: 'pages.customClient.createdAt',
+        defaultMessage: 'Created At',
+      }),
+      dataIndex: 'createdAt',
+      key: 'createdAt',
+      width: 190,
+      ellipsis: true,
+      render: (_: React.ReactNode, record: API.CustomClientBuild) =>
+        record.createdAt ? new Date(record.createdAt).toLocaleString() : '-',
+    },
+    {
+      title: intl.formatMessage({
         id: 'pages.customClient.status',
         defaultMessage: 'Status',
       }),
@@ -396,18 +408,6 @@ const BuildList: React.FC<BuildListProps> = ({
           </Tag>
         );
       },
-    },
-    {
-      title: intl.formatMessage({
-        id: 'pages.customClient.createdAt',
-        defaultMessage: 'Created At',
-      }),
-      dataIndex: 'createdAt',
-      key: 'createdAt',
-      width: 190,
-      ellipsis: true,
-      render: (_: React.ReactNode, record: API.CustomClientBuild) =>
-        record.createdAt ? new Date(record.createdAt).toLocaleString() : '-',
     },
     {
       title: intl.formatMessage({
