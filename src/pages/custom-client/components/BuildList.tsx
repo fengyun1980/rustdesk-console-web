@@ -233,7 +233,7 @@ const BuildList: React.FC<BuildListProps> = ({
         defaultMessage: 'Action',
       }),
       key: 'action',
-      width: 280,
+      width: 400,
       search: false,
       render: (_: any, record: API.CustomClientBuild) => {
         const files: { name: string; url: string }[] = record.files
@@ -296,7 +296,7 @@ const BuildList: React.FC<BuildListProps> = ({
                   href={file.url}
                   target="_blank"
                   rel="noreferrer"
-                  style={{ marginRight: 8 }}
+                  style={{ marginRight: 8, whiteSpace: 'nowrap' }}
                 >
                   {file.name}
                 </a>
