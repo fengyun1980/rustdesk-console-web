@@ -247,6 +247,20 @@ const hostFromWsUrl = (url: string | undefined, port: number): string => {
   }
 };
 
+// 控制台网页客户端的 ID 服务器地址形如 wss://host/ws/id，同一来源的
+// http(s) 地址就是客户端的 API 服务器（账号登录请求 {api-server}/api/login）。
+// RustDesk 默认猜的是「ID 服务器主机:21114」，控制台挂在 443/反代后面时会连不上。
+const apiServerFromWsUrl = (url: string | undefined): string => {
+  if (!url) return '';
+  try {
+    const parsed = new URL(url);
+    if (parsed.protocol !== 'ws:' && parsed.protocol !== 'wss:') return '';
+    return `${parsed.protocol === 'wss:' ? 'https:' : 'http:'}//${parsed.host}`;
+  } catch {
+    return '';
+  }
+};
+
 const StrategyConfigStep: React.FC<StrategyConfigStepProps> = ({
   value = {},
   onChange,
@@ -285,6 +299,10 @@ const StrategyConfigStep: React.FC<StrategyConfigStepProps> = ({
         }
         if (settings.serverPublicKey) {
           presets.key = { mode: 'default', value: settings.serverPublicKey };
+        }
+        const apiServer = apiServerFromWsUrl(settings.idServerUrl);
+        if (apiServer) {
+          presets['api-server'] = { mode: 'default', value: apiServer };
         }
         if (Object.keys(presets).length === 0) return;
         setLocalValue(presets);
