@@ -658,15 +658,23 @@ const BuildList: React.FC<BuildListProps> = ({
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             <div
               style={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                alignItems: 'center',
+                columnGap: 8,
                 fontSize: 12,
                 color: 'var(--ant-color-text-secondary, rgba(0, 0, 0, 0.65))',
               }}
             >
-              {appNameOf(record)} · {record.os} / {record.arch || '-'} ·{' '}
-              {versionOf(record)}
-              {record.createdAt
-                ? ` · ${new Date(record.createdAt).toLocaleString()}`
-                : ''}
+              <span>
+                {appNameOf(record)} · {record.os} / {record.arch || '-'} ·{' '}
+                {versionOf(record)}
+              </span>
+              {record.createdAt && (
+                <span style={{ marginLeft: 'auto' }}>
+                  {new Date(record.createdAt).toLocaleString()}
+                </span>
+              )}
             </div>
             {renderStatus(record, true)}
             {files.length > 0 && (
