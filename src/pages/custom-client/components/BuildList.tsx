@@ -305,7 +305,7 @@ const BuildList: React.FC<BuildListProps> = ({
             flexDirection: 'column',
           }}
         >
-          <Space size={6} align="center" wrap>
+          <Space size={12} align="center" wrap>
             <Tag color={config.color} icon={config.icon}>
               {statusLabel(record.status)}
             </Tag>
