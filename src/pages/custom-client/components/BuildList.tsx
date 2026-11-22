@@ -373,22 +373,47 @@ const BuildList: React.FC<BuildListProps> = ({
       );
     }
     return (
-      <Tag color={config.color} icon={config.icon}>
+      <Tag
+        color={config.color}
+        icon={config.icon}
+        style={mobile ? { alignSelf: 'flex-start' } : undefined}
+      >
         {statusLabel(record.status)}
       </Tag>
     );
   };
 
-  const renderActionItems = (
+  const filesOf = (
+    record: API.CustomClientBuild,
+  ): { name: string; url: string }[] => {
+    try {
+      return record.files ? JSON.parse(record.files) : [];
+    } catch {
+      return [];
+    }
+  };
+
+  const renderFileLinks = (
     record: API.CustomClientBuild,
   ): React.ReactNode[] => {
-    const files: { name: string; url: string }[] = (() => {
-      try {
-        return record.files ? JSON.parse(record.files) : [];
-      } catch {
-        return [];
-      }
-    })();
+    if (record.status !== 'completed') return [];
+    return filesOf(record).map((file) => (
+      <a
+        key={`file-${file.url}`}
+        href={file.url}
+        target="_blank"
+        rel="noreferrer"
+        style={{ wordBreak: 'break-all' }}
+      >
+        {file.name}
+      </a>
+    ));
+  };
+
+  const renderActionItems = (
+    record: API.CustomClientBuild,
+    includeFiles = true,
+  ): React.ReactNode[] => {
     const isInProgress =
       record.status === 'pending' || record.status === 'building';
     const isTerminal = TERMINAL_STATUSES.includes(record.status);
@@ -467,20 +492,8 @@ const BuildList: React.FC<BuildListProps> = ({
         </Button>,
       );
     }
-    if (record.status === 'completed') {
-      files.forEach((file) => {
-        items.push(
-          <a
-            key={`file-${file.url}`}
-            href={file.url}
-            target="_blank"
-            rel="noreferrer"
-            style={{ wordBreak: 'break-all' }}
-          >
-            {file.name}
-          </a>,
-        );
-      });
+    if (record.status === 'completed' && includeFiles) {
+      items.push(...renderFileLinks(record));
     }
     if (isTerminal) {
       items.push(
@@ -639,26 +652,32 @@ const BuildList: React.FC<BuildListProps> = ({
         defaultMessage: 'Status',
       }),
       key: 'mobileBuild',
-      render: (_: React.ReactNode, record: API.CustomClientBuild) => (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          <div
-            style={{
-              fontSize: 12,
-              color: 'var(--ant-color-text-secondary, rgba(0, 0, 0, 0.65))',
-            }}
-          >
-            {appNameOf(record)} · {record.os} / {record.arch || '-'} ·{' '}
-            {versionOf(record)}
-            {record.createdAt
-              ? ` · ${new Date(record.createdAt).toLocaleString()}`
-              : ''}
+      render: (_: React.ReactNode, record: API.CustomClientBuild) => {
+        const files = renderFileLinks(record);
+        return (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div
+              style={{
+                fontSize: 12,
+                color: 'var(--ant-color-text-secondary, rgba(0, 0, 0, 0.65))',
+              }}
+            >
+              {appNameOf(record)} · {record.os} / {record.arch || '-'} ·{' '}
+              {versionOf(record)}
+              {record.createdAt
+                ? ` · ${new Date(record.createdAt).toLocaleString()}`
+                : ''}
+            </div>
+            {renderStatus(record, true)}
+            {files.length > 0 && (
+              <div className="custom-client-mobile-files">{files}</div>
+            )}
+            <div className="custom-client-mobile-actions">
+              {renderActionItems(record, false)}
+            </div>
           </div>
-          {renderStatus(record, true)}
-          <div className="custom-client-mobile-actions">
-            {renderActionItems(record)}
-          </div>
-        </div>
-      ),
+        );
+      },
     },
   ];
 

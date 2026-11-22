@@ -211,6 +211,20 @@ ol {
   cursor: col-resize;
 }
 
+// 移动端构建卡片的产物文件：居中显示，和底部操作区分开
+.custom-client-mobile-files {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 0 8px;
+  text-align: center;
+
+  a {
+    word-break: break-all;
+  }
+}
+
 // 移动端构建卡片底部操作区：分隔线 + 胶囊按钮 + 悬浮反馈
 .custom-client-mobile-actions {
   display: flex;
