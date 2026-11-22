@@ -330,7 +330,12 @@ const BuildList: React.FC<BuildListProps> = ({
             percent={percent}
             size="small"
             status="active"
-            style={{ margin: '4px 0 2px', width: '100%', minWidth: 0 }}
+            style={{
+              margin: '4px 0 2px',
+              width: '100%',
+              maxWidth: mobile ? 240 : undefined,
+              minWidth: 0,
+            }}
           />
           <div
             title={stepText}
