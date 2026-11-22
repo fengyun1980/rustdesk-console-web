@@ -242,6 +242,19 @@ ol {
   }
 }
 
+// 进度弹窗的任务标题（如 generate_bridge 的矩阵名）过长时换行，避免横向溢出
+.custom-client-progress {
+  .ant-collapse-header-text {
+    min-width: 0;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .ant-collapse-header {
+    align-items: flex-start;
+  }
+}
+
 // 移动端构建卡片底部操作区：分隔线 + 胶囊按钮 + 悬浮反馈
 .custom-client-mobile-actions {
   display: flex;

@@ -125,6 +125,7 @@ const ProgressModal: React.FC<ProgressModalProps> = ({
               marginBottom: 16,
               fontSize: 12,
               color: 'var(--ant-color-text-tertiary, rgba(0, 0, 0, 0.45))',
+              overflowWrap: 'anywhere',
             }}
           >
             {progress.currentJob
@@ -137,11 +138,28 @@ const ProgressModal: React.FC<ProgressModalProps> = ({
               : ''}
           </div>
           <Collapse
+            className="custom-client-progress"
             items={progress.jobs.map((job, idx) => ({
               key: String(idx),
               label: (
-                <span>
-                  <Tag color={jobColor(job.status, job.conclusion)}>
+                <span
+                  style={{
+                    display: 'block',
+                    minWidth: 0,
+                    overflowWrap: 'anywhere',
+                  }}
+                >
+                  <Tag
+                    color={jobColor(job.status, job.conclusion)}
+                    style={{
+                      maxWidth: '100%',
+                      height: 'auto',
+                      lineHeight: 1.5,
+                      marginInlineEnd: 0,
+                      paddingBlock: 2,
+                      whiteSpace: 'normal',
+                    }}
+                  >
                     {job.name}
                   </Tag>
                 </span>
