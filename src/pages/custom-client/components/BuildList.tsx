@@ -12,7 +12,7 @@ import {
 import type { ActionType, ProColumns } from '@ant-design/pro-components';
 import { ProTable } from '@ant-design/pro-components';
 import { FormattedMessage, useIntl } from '@umijs/max';
-import { App, Button, Popconfirm, Space, Tag, Typography } from 'antd';
+import { App, Button, Popconfirm, Progress, Space, Tag, Typography } from 'antd';
 import React from 'react';
 import {
   deleteBuild,
@@ -203,12 +203,49 @@ const BuildList: React.FC<BuildListProps> = ({
       }),
       dataIndex: 'status',
       key: 'status',
-      width: 140,
+      width: 200,
       render: (_: React.ReactNode, record: API.CustomClientBuild) => {
         const config = statusConfig[record.status] || {
           color: 'default',
           icon: null,
         };
+        if (record.status === 'pending' || record.status === 'building') {
+          const percent = record.progress?.percent ?? 0;
+          const stepText =
+            record.progress?.currentStep ||
+            record.progress?.currentJob ||
+            intl.formatMessage({
+              id: 'pages.customClient.waitingGithub',
+              defaultMessage: 'Waiting for GitHub…',
+            });
+          return (
+            <div style={{ minWidth: 160 }}>
+              <Tag color={config.color} icon={config.icon}>
+                {statusLabel(record.status)}
+              </Tag>
+              <Progress
+                percent={percent}
+                size="small"
+                status="active"
+                style={{ margin: '4px 0 2px' }}
+              />
+              <div
+                title={stepText}
+                style={{
+                  fontSize: 12,
+                  lineHeight: '16px',
+                  color: 'var(--ant-color-text-tertiary, rgba(0, 0, 0, 0.45))',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  maxWidth: 170,
+                }}
+              >
+                {stepText}
+              </div>
+            </div>
+          );
+        }
         return (
           <Tag color={config.color} icon={config.icon}>
             {statusLabel(record.status)}

@@ -1280,6 +1280,7 @@ declare namespace API {
     githubRunId: number | null;
     createdAt: string;
     updatedAt: string;
+    progress?: CustomClientBuildProgress;
   };
 
   type CustomClientBuildStep = {
@@ -1299,6 +1300,11 @@ declare namespace API {
     runId: number | null;
     runStatus: string;
     runConclusion: string | null;
+    percent: number;
+    totalSteps: number;
+    completedSteps: number;
+    currentJob: string | null;
+    currentStep: string | null;
     jobs: CustomClientBuildJob[];
   };
 

@@ -6,7 +6,7 @@ import {
   MinusCircleOutlined,
 } from '@ant-design/icons';
 import { useIntl } from '@umijs/max';
-import { Alert, Collapse, Modal, Tag, Timeline } from 'antd';
+import { Alert, Collapse, Modal, Progress, Tag, Timeline } from 'antd';
 import React from 'react';
 import { getBuildProgress } from '@/services/rustdesk-console/custom-client';
 
@@ -109,6 +109,32 @@ const ProgressModal: React.FC<ProgressModalProps> = ({
               {progress.runStatus}
             </Tag>
             {progress.runConclusion && <Tag>{progress.runConclusion}</Tag>}
+          </div>
+          <Progress
+            percent={progress.percent ?? 0}
+            status={
+              progress.runStatus === 'completed'
+                ? progress.runConclusion === 'success'
+                  ? 'success'
+                  : 'exception'
+                : 'active'
+            }
+          />
+          <div
+            style={{
+              marginBottom: 16,
+              fontSize: 12,
+              color: 'var(--ant-color-text-tertiary, rgba(0, 0, 0, 0.45))',
+            }}
+          >
+            {progress.currentJob
+              ? `${progress.currentJob} · `
+              : ''}
+            {progress.currentStep || ''}
+            {typeof progress.completedSteps === 'number' &&
+            progress.totalSteps
+              ? ` (${progress.completedSteps}/${progress.totalSteps})`
+              : ''}
           </div>
           <Collapse
             items={progress.jobs.map((job, idx) => ({
