@@ -50,6 +50,18 @@ body,
     'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
 }
 
+// 移动端默认禁止双指缩放（iOS 会忽略 viewport 的 user-scalable，需要 touch-action）
+html,
+body {
+  touch-action: pan-x pan-y;
+}
+
+// 网页远控页保留双指缩放，用于放大/缩小对端屏幕内容
+html.allow-pinch,
+html.allow-pinch body {
+  touch-action: auto;
+}
+
 .colorWeak {
   filter: invert(80%);
 }

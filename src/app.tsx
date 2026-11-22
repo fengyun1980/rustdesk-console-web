@@ -2,7 +2,12 @@ import { LinkOutlined } from '@ant-design/icons';
 import type { Settings as LayoutSettings } from '@ant-design/pro-components';
 import { SettingDrawer } from '@ant-design/pro-components';
 import type { RequestConfig, RunTimeLayoutConfig } from '@umijs/max';
-import { getAllLocales, history, Link, setLocale } from '@umijs/max';
+import {
+  getAllLocales,
+  history,
+  Link,
+  setLocale,
+} from '@umijs/max';
 import React from 'react';
 import {
   AvatarDropdown,
@@ -61,6 +66,30 @@ function storeThemeSettings(settings: Partial<LayoutSettings>) {
   } catch {
     // ignore
   }
+}
+
+const VIEWPORT_LOCKED =
+  'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no';
+const VIEWPORT_ZOOMABLE =
+  'width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes';
+
+// 控制台移动端默认禁止缩放；只有网页远控页允许放大对端屏幕。
+function applyZoomPolicy(pathname: string) {
+  if (typeof document === 'undefined') return;
+  const allowZoom = pathname.startsWith('/web-client');
+  let meta = document.querySelector<HTMLMetaElement>('meta[name="viewport"]');
+  if (!meta) {
+    meta = document.createElement('meta');
+    meta.name = 'viewport';
+    document.head.appendChild(meta);
+  }
+  meta.content = allowZoom ? VIEWPORT_ZOOMABLE : VIEWPORT_LOCKED;
+  document.documentElement.classList.toggle('allow-pinch', allowZoom);
+}
+
+if (typeof window !== 'undefined') {
+  applyZoomPolicy(window.location.pathname);
+  history.listen(({ location }) => applyZoomPolicy(location.pathname));
 }
 
 export async function getInitialState(): Promise<{
