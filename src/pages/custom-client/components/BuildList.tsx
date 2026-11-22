@@ -9,7 +9,11 @@ import {
   RedoOutlined,
   WarningOutlined,
 } from '@ant-design/icons';
-import type { ActionType, ProColumns } from '@ant-design/pro-components';
+import type {
+  ActionType,
+  ColumnsState,
+  ProColumns,
+} from '@ant-design/pro-components';
 import { ProTable } from '@ant-design/pro-components';
 import { FormattedMessage, useIntl } from '@umijs/max';
 import { App, Button, Popconfirm, Progress, Space, Tag, Typography } from 'antd';
@@ -58,6 +62,19 @@ const statusConfig: Record<string, { color: string; icon: React.ReactNode }> = {
   action_required: { color: 'warning', icon: <WarningOutlined /> },
 };
 
+const COLUMNS_STATE_KEY = 'custom_client_build_list_columns_state_v2';
+
+const readColumnsState = (): Record<string, ColumnsState> => {
+  try {
+    const raw = localStorage.getItem(COLUMNS_STATE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch {
+    // fall through to defaults
+  }
+  // 默认隐藏 UUID 列，与历史界面保持一致；用户仍可在列设置里打开
+  return { uuid: { show: false } };
+};
+
 const BuildList: React.FC<BuildListProps> = ({
   actionRef,
   onCreate,
@@ -70,6 +87,8 @@ const BuildList: React.FC<BuildListProps> = ({
   const [generatorRepo, setGeneratorRepo] = React.useState<string>(
     'databk/rustdesk-generator',
   );
+  const [columnsStateMap, setColumnsStateMap] =
+    React.useState<Record<string, ColumnsState>>(readColumnsState);
 
   React.useEffect(() => {
     getCustomClientSettings()
@@ -260,6 +279,7 @@ const BuildList: React.FC<BuildListProps> = ({
       }),
       dataIndex: 'createdAt',
       key: 'createdAt',
+      width: 190,
       ellipsis: true,
       render: (_: React.ReactNode, record: API.CustomClientBuild) =>
         record.createdAt ? new Date(record.createdAt).toLocaleString() : '-',
@@ -270,7 +290,6 @@ const BuildList: React.FC<BuildListProps> = ({
         defaultMessage: 'Action',
       }),
       key: 'action',
-      width: 280,
       search: false,
       render: (_: any, record: API.CustomClientBuild) => {
         const files: { name: string; url: string }[] = record.files
@@ -385,8 +404,15 @@ const BuildList: React.FC<BuildListProps> = ({
         </Title>
       }
       columnsState={{
-        persistenceType: 'localStorage',
-        persistenceKey: 'custom_client_build_list_columns_state',
+        value: columnsStateMap,
+        onChange: (map) => {
+          setColumnsStateMap(map);
+          try {
+            localStorage.setItem(COLUMNS_STATE_KEY, JSON.stringify(map));
+          } catch {
+            // ignore storage quota/permission errors
+          }
+        },
       }}
       actionRef={actionRef}
       rowKey="uuid"
@@ -397,7 +423,7 @@ const BuildList: React.FC<BuildListProps> = ({
         showSizeChanger: true,
         showQuickJumper: true,
       }}
-      scroll={{ x: 'max-content' }}
+      scroll={{ x: 900 }}
       options={{
         density: true,
         setting: { listsHeight: 400 },
