@@ -18,6 +18,8 @@ import type {
 import { ProTable } from '@ant-design/pro-components';
 import { FormattedMessage, useIntl } from '@umijs/max';
 import { App, Button, Popconfirm, Progress, Space, Tag, Typography } from 'antd';
+import type { ResizeCallbackData } from 'react-resizable';
+import { Resizable } from 'react-resizable';
 import React from 'react';
 import {
   cancelBuild,
@@ -65,6 +67,46 @@ const statusConfig: Record<string, { color: string; icon: React.ReactNode }> = {
 };
 
 const COLUMNS_STATE_KEY = 'custom_client_build_list_columns_state_v2';
+const COLUMN_WIDTHS_KEY = 'custom_client_build_list_column_widths_v1';
+
+const readColumnWidths = (): Record<string, number> => {
+  try {
+    const raw = localStorage.getItem(COLUMN_WIDTHS_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch {
+    // fall through to defaults
+  }
+  return {};
+};
+
+type ResizableTitleProps = React.ThHTMLAttributes<HTMLTableCellElement> & {
+  width?: number;
+  onResize?: (e: React.SyntheticEvent, data: ResizeCallbackData) => void;
+};
+
+const ResizableTitle: React.FC<ResizableTitleProps> = ({
+  onResize,
+  width,
+  ...restProps
+}) => {
+  if (!width) return <th {...restProps} />;
+  return (
+    <Resizable
+      width={width}
+      height={0}
+      handle={
+        <span
+          className="react-resizable-handle"
+          onClick={(e) => e.stopPropagation()}
+        />
+      }
+      draggableOpts={{ enableUserSelectHack: false }}
+      onResize={onResize}
+    >
+      <th {...restProps} />
+    </Resizable>
+  );
+};
 
 const readColumnsState = (): Record<string, ColumnsState> => {
   try {
@@ -91,6 +133,22 @@ const BuildList: React.FC<BuildListProps> = ({
   );
   const [columnsStateMap, setColumnsStateMap] =
     React.useState<Record<string, ColumnsState>>(readColumnsState);
+  const [columnWidths, setColumnWidths] =
+    React.useState<Record<string, number>>(readColumnWidths);
+
+  const handleResize =
+    (key: string) =>
+    (_e: React.SyntheticEvent, { size }: ResizeCallbackData) => {
+      setColumnWidths((prev) => {
+        const next = { ...prev, [key]: Math.max(60, Math.round(size.width)) };
+        try {
+          localStorage.setItem(COLUMN_WIDTHS_KEY, JSON.stringify(next));
+        } catch {
+          // ignore storage quota/permission errors
+        }
+        return next;
+      });
+    };
 
   React.useEffect(() => {
     getCustomClientSettings()
@@ -479,6 +537,32 @@ const BuildList: React.FC<BuildListProps> = ({
     },
   ];
 
+  // 所有列默认给一个宽度，用户拖拽表头右边缘即可调整，宽度按列 key 持久化。
+  const mergedColumns = columns.map((col) => {
+    const key = String(col.key ?? col.dataIndex ?? '');
+    const width =
+      columnWidths[key] ??
+      (typeof col.width === 'number'
+        ? col.width
+        : key === 'action'
+          ? 360
+          : undefined);
+    return {
+      ...col,
+      width,
+      onHeaderCell: (column: ProColumns<API.CustomClientBuild>) =>
+        ({
+          width: column.width,
+          onResize: handleResize(key),
+        }) as React.ThHTMLAttributes<HTMLTableCellElement>,
+    } as ProColumns<API.CustomClientBuild>;
+  });
+
+  const totalWidth = mergedColumns.reduce(
+    (sum, col) => sum + (typeof col.width === 'number' ? col.width : 0),
+    0,
+  );
+
   return (
     <ProTable<API.CustomClientBuild>
       headerTitle={
@@ -503,13 +587,14 @@ const BuildList: React.FC<BuildListProps> = ({
       actionRef={actionRef}
       rowKey="uuid"
       search={false}
-      columns={columns}
+      columns={mergedColumns}
+      components={{ header: { cell: ResizableTitle } }}
       pagination={{
         defaultPageSize: 20,
         showSizeChanger: true,
         showQuickJumper: true,
       }}
-      scroll={{ x: 900 }}
+      scroll={{ x: totalWidth }}
       options={{
         density: true,
         setting: { listsHeight: 400 },
