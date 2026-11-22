@@ -21,6 +21,7 @@ import {
   OS_ARCH_MAP,
   OS_OPTIONS,
 } from '../constants';
+import { getRustdeskReleases } from '@/services/rustdesk-console/custom-client';
 import StrategyConfigStep, {
   type StrategyConfigValues,
 } from './StrategyConfigStep';
@@ -92,6 +93,7 @@ const CreateBuildModal: React.FC<CreateBuildModalProps> = ({
   const [currentStep, setCurrentStep] = React.useState(0);
   const [strategyConfig, setStrategyConfig] =
     React.useState<StrategyConfigValues>({});
+  const [releases, setReleases] = React.useState<API.RustdeskRelease[]>([]);
   const osValue = Form.useWatch('os', form);
   const isAllOs = osValue === 'all';
   const availableArchs =
@@ -115,6 +117,13 @@ const CreateBuildModal: React.FC<CreateBuildModalProps> = ({
       setStrategyConfig({});
     }
   }, [open, form]);
+
+  React.useEffect(() => {
+    if (!open) return;
+    getRustdeskReleases()
+      .then((list) => setReleases(Array.isArray(list) ? list : []))
+      .catch(() => setReleases([]));
+  }, [open]);
 
   React.useEffect(() => {
     if (isAllOs) return;
@@ -279,6 +288,35 @@ const CreateBuildModal: React.FC<CreateBuildModalProps> = ({
               )}
             </Col>
           </Row>
+
+          <Form.Item
+            name="version"
+            label={intl.formatMessage({
+              id: 'pages.customClient.rustdeskVersion',
+              defaultMessage: 'RustDesk Version',
+            })}
+            extra={intl.formatMessage({
+              id: 'pages.customClient.rustdeskVersionHint',
+              defaultMessage:
+                'Leave empty to build the latest upstream branch. Pick a release tag for a stable build.',
+            })}
+          >
+            <Select
+              allowClear
+              showSearch
+              optionFilterProp="label"
+              placeholder={intl.formatMessage({
+                id: 'pages.customClient.rustdeskVersionLatest',
+                defaultMessage: 'Latest (upstream default branch)',
+              })}
+              options={releases.map((release) => ({
+                label: release.prerelease
+                  ? `${release.tag} (beta)`
+                  : release.tag,
+                value: release.tag,
+              }))}
+            />
+          </Form.Item>
 
           <Form.Item
             name="app-name"
