@@ -659,19 +659,31 @@ const BuildList: React.FC<BuildListProps> = ({
             <div
               style={{
                 display: 'flex',
-                flexWrap: 'wrap',
                 alignItems: 'center',
                 columnGap: 8,
                 fontSize: 12,
                 color: 'var(--ant-color-text-secondary, rgba(0, 0, 0, 0.65))',
               }}
             >
-              <span>
+              <span
+                style={{
+                  minWidth: 0,
+                  overflow: 'hidden',
+                  whiteSpace: 'nowrap',
+                  textOverflow: 'ellipsis',
+                }}
+              >
                 {appNameOf(record)} · {record.os} / {record.arch || '-'} ·{' '}
                 {versionOf(record)}
               </span>
               {record.createdAt && (
-                <span style={{ marginLeft: 'auto' }}>
+                <span
+                  style={{
+                    marginLeft: 'auto',
+                    flexShrink: 0,
+                    whiteSpace: 'nowrap',
+                  }}
+                >
                   {new Date(record.createdAt).toLocaleString()}
                 </span>
               )}
