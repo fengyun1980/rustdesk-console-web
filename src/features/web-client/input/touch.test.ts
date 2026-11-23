@@ -109,3 +109,34 @@ test('滚动模式仅发送滚轮，失焦停止长按计时', () => {
     g.send.mock.calls.some(([value]) => value.mouseEvent?.mask === 17),
   ).toBe(false);
 });
+test('鼠标模式单指拖动按相对位移发送绝对坐标', () => {
+  const f = fixture('mouse');
+  f.pointer('pointerdown', 1, 200, 100);
+  f.pointer('pointermove', 1, 260, 180);
+  expect(f.send).toHaveBeenLastCalledWith({
+    mouseEvent: { mask: 0, x: -540, y: 180 },
+  });
+  f.pointer('pointerup', 1, 260, 180);
+  expect(f.send).toHaveBeenCalledTimes(1);
+});
+test('鼠标模式轻点发送左键点击', () => {
+  const f = fixture('mouse');
+  f.pointer('pointerdown', 1, 200, 100);
+  f.pointer('pointerup', 1, 200, 100);
+  expect(f.send.mock.calls.map(([value]) => value.mouseEvent?.mask)).toEqual([
+    0, 9, 10,
+  ]);
+  expect(f.send.mock.calls[0][0].mouseEvent?.x).toBe(-600);
+});
+test('鼠标模式双指滑动发送滚轮且不缩放', () => {
+  const f = fixture('mouse');
+  f.pointer('pointerdown', 1, 100, 100);
+  f.pointer('pointerdown', 2, 200, 100);
+  f.pointer('pointermove', 1, 100, 148);
+  expect(f.send).toHaveBeenLastCalledWith({
+    mouseEvent: { mask: 3, x: 0, y: 1 },
+  });
+  f.pointer('pointerup', 1, 100, 148);
+  f.pointer('pointerup', 2, 200, 100);
+  expect(f.zoom).not.toHaveBeenCalled();
+});

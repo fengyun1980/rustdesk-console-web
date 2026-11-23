@@ -96,12 +96,15 @@ export default {
   'webClient.display': 'Monitor',
   'webClient.volume': 'Volume',
   'webClient.touchMode': 'Touch mode',
-  'webClient.touchPointer': 'Point / drag',
+  'webClient.touchPointer': 'Touch',
+  'webClient.touchMouse': 'Mouse (trackpad)',
   'webClient.touchScroll': 'Scroll',
   'webClient.touchZoom': 'Pan zoomed view',
   'webClient.zoomReset': 'Reset zoom',
   'webClient.touchNotice':
     'Touch to click, move to drag, hold for right click. Pinch with two fingers to zoom locally; use Scroll mode for the remote wheel. Send keyboard text after IME composition.',
+  'webClient.touchMouseNotice':
+    'Mouse mode: drag with one finger to move the pointer, tap for left click, hold or two-finger tap for right click, slide two fingers to scroll.',
   'webClient.connectDevice': 'Connect to a device',
   'webClient.connectionApproval':
     'Use the device password, or wait for approval on the remote device.',

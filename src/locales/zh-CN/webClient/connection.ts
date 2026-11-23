@@ -86,12 +86,15 @@ export default {
   'webClient.display': '显示器',
   'webClient.volume': '音量',
   'webClient.touchMode': '触控模式',
-  'webClient.touchPointer': '定位 / 拖动',
+  'webClient.touchPointer': '触屏（点按）',
+  'webClient.touchMouse': '鼠标（触控板）',
   'webClient.touchScroll': '远端滚动',
   'webClient.touchZoom': '缩放后平移',
   'webClient.zoomReset': '重置缩放',
   'webClient.touchNotice':
     '轻点定位并点击，移动拖动，长按右键；双指仅缩放本地画面。滚轮请选择“远端滚动”。输入法组合完成后显式发送文本。',
+  'webClient.touchMouseNotice':
+    '鼠标模式：单指拖动移动光标，轻点左键，长按或双指轻点右键，双指滑动滚轮。',
   'webClient.connectDevice': '连接设备',
   'webClient.connectionApproval': '使用设备密码，或等待对方同意连接。',
   'webClient.sessionAlerts': '连接提示',
