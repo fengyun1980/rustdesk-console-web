@@ -782,6 +782,13 @@ export class RemoteSession {
     } catch (error) {
       if (generation !== this.generation) return;
 
+      // 诊断用：把底层异常打到控制台，便于判断对端在哪个环节不兼容。
+      // 不携带收到的数据包、凭据或原始服务端消息。
+      console.error(
+        '[web-client] session failed:',
+        error instanceof SessionError ? error.code : 'protocol',
+        error,
+      );
       this.fail(error instanceof SessionError ? error.code : 'protocol');
     }
   }

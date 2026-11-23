@@ -513,6 +513,7 @@ export default function WebClientPage() {
                 : undefined,
             );
           } else if (message.type === 'error' || message.type === 'warning') {
+            console.error('[web-client] session error:', message.code);
             if (
               message.code === 'authorization' ||
               message.code === 'sessionExpired'
