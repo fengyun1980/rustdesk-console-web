@@ -380,28 +380,6 @@ const CreateBuildModal: React.FC<CreateBuildModalProps> = ({
                 />
               </Form.Item>
             </Col>
-            <Col xs={24} sm={12}>
-              <Form.Item
-                name="salt"
-                label={intl.formatMessage({
-                  id: 'pages.customClient.salt',
-                  defaultMessage: 'Salt',
-                })}
-                extra={intl.formatMessage({
-                  id: 'pages.customClient.saltExtra',
-                  defaultMessage:
-                    'Generated automatically. No need to change it.',
-                })}
-              >
-                <Input.Password
-                  readOnly
-                  placeholder={intl.formatMessage({
-                    id: 'pages.customClient.saltPlaceholder',
-                    defaultMessage: 'Enter salt',
-                  })}
-                />
-              </Form.Item>
-            </Col>
           </Row>
 
           <Form.Item
