@@ -1,6 +1,5 @@
 import { LinkOutlined } from '@ant-design/icons';
 import type { Settings as LayoutSettings } from '@ant-design/pro-components';
-import { SettingDrawer } from '@ant-design/pro-components';
 import type { RequestConfig, RunTimeLayoutConfig } from '@umijs/max';
 import {
   getAllLocales,
@@ -58,14 +57,6 @@ function getStoredThemeSettings(): Partial<LayoutSettings> | undefined {
     // ignore
   }
   return undefined;
-}
-
-function storeThemeSettings(settings: Partial<LayoutSettings>) {
-  try {
-    localStorage.setItem(THEME_KEY, JSON.stringify(settings));
-  } catch {
-    // ignore
-  }
 }
 
 const VIEWPORT_LOCKED =
@@ -208,10 +199,7 @@ export async function getInitialState(): Promise<{
   };
 }
 
-export const layout: RunTimeLayoutConfig = ({
-  initialState,
-  setInitialState,
-}) => {
+export const layout: RunTimeLayoutConfig = ({ initialState }) => {
   const frontendSettings =
     initialState?.frontendSettings || DEFAULT_FRONTEND_SETTINGS;
   const waterMarkProps = getUsernameWatermark(
@@ -271,20 +259,6 @@ export const layout: RunTimeLayoutConfig = ({
         <>
           <AuthSync />
           {children}
-          {isDev && (
-            <SettingDrawer
-              disableUrlParams
-              enableDarkTheme
-              settings={initialState?.settings}
-              onSettingChange={(settings) => {
-                storeThemeSettings(settings);
-                setInitialState((preInitialState) => ({
-                  ...preInitialState,
-                  settings,
-                }));
-              }}
-            />
-          )}
         </>
       );
     },
