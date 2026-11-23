@@ -525,8 +525,10 @@ export class RemoteSession {
         if (message.hash) {
           if (this.state === 'connected') throw new SessionError('protocol');
           const { salt, challenge } = message.hash;
+          // 1.5.x 被控端在未设置固定密码时下发空 salt（随机密码模式），
+          // 此时密码哈希按 sha256(password + "") 计算，native 端同样接受空 salt。
           if (
-            !salt ||
+            typeof salt !== 'string' ||
             !challenge ||
             salt.length > 4096 ||
             challenge.length > 4096
