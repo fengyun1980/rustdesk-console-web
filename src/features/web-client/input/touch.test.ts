@@ -117,14 +117,14 @@ test('鼠标模式单指拖动按相对位移发送绝对坐标', () => {
     mouseEvent: { mask: 0, x: -540, y: 180 },
   });
   f.pointer('pointerup', 1, 260, 180);
-  expect(f.send).toHaveBeenCalledTimes(1);
+  expect(f.send).toHaveBeenCalledTimes(2);
 });
 test('鼠标模式轻点发送左键点击', () => {
   const f = fixture('mouse');
   f.pointer('pointerdown', 1, 200, 100);
   f.pointer('pointerup', 1, 200, 100);
   expect(f.send.mock.calls.map(([value]) => value.mouseEvent?.mask)).toEqual([
-    0, 9, 10,
+    0, 0, 9, 10,
   ]);
   expect(f.send.mock.calls[0][0].mouseEvent?.x).toBe(-600);
 });

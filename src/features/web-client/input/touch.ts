@@ -24,6 +24,7 @@ export class RemoteTouch {
   private pinchStart = 0;
   private pinchOrigin?: Map<number, Point>;
   private pinchMoved = 0;
+  private cursorEl?: HTMLDivElement;
   private abort = new AbortController();
   constructor(
     private canvas: HTMLCanvasElement,
@@ -42,6 +43,7 @@ export class RemoteTouch {
     window.addEventListener('blur', this.cancel, options);
     window.addEventListener('orientationchange', this.cancel, options);
     document.addEventListener('visibilitychange', this.visibility, options);
+    if (mode === 'mouse') this.createCursor();
   }
   private visibility = () => {
     if (document.hidden) this.cancel();
@@ -64,6 +66,27 @@ export class RemoteTouch {
       x: Math.max(rect.left, Math.min(rect.left + rect.width, point.x)),
       y: Math.max(rect.top, Math.min(rect.top + rect.height, point.y)),
     };
+  }
+  private createCursor() {
+    if (typeof document === 'undefined') return;
+    const el = document.createElement('div');
+    el.style.cssText =
+      'position:fixed;left:0;top:0;width:20px;height:20px;margin:-2px 0 0 -2px;' +
+      'pointer-events:none;z-index:9999;display:none;' +
+      'filter:drop-shadow(0 1px 2px rgba(0,0,0,.65))';
+    el.innerHTML =
+      '<svg width="20" height="20" viewBox="0 0 24 24">' +
+      '<path d="M4 2l15 9-6.4 1.6L9 21z" fill="#fff" stroke="#111" ' +
+      'stroke-width="1.6" stroke-linejoin="round"/></svg>';
+    document.body.appendChild(el);
+    this.cursorEl = el;
+  }
+  private showCursor(point: Point) {
+    const el = this.cursorEl;
+    if (!el) return;
+    el.style.display = 'block';
+    el.style.left = `${point.x}px`;
+    el.style.top = `${point.y}px`;
   }
   private click(button = 1) {
     this.send({ mouseEvent: { mask: 1 | (button << 3) } });
@@ -104,6 +127,8 @@ export class RemoteTouch {
     this.suppressClick = false;
     if (this.mode === 'mouse') {
       if (!this.cursor) this.cursor = { ...point };
+      this.showCursor(this.cursor);
+      this.position(this.cursor);
       this.hold = setTimeout(() => {
         if (this.points.size === 1 && !this.dragging && !this.suppressClick) {
           this.position(this.cursor ?? point);
@@ -208,6 +233,7 @@ export class RemoteTouch {
         y: (this.cursor?.y ?? this.origin.y) + dy,
       });
       this.position(this.cursor);
+      this.showCursor(this.cursor);
       this.last = point;
     } else if (this.mode === 'zoom') {
       this.viewport = {
@@ -255,7 +281,9 @@ export class RemoteTouch {
     if (this.mode === 'mouse' && this.points.size === 2) {
       this.points.set(event.pointerId, point);
       if (Date.now() - this.pinchStart < 300 && this.pinchMoved < 10) {
-        this.position(this.cursor ?? point);
+        this.cursor = this.cursor ?? { ...point };
+        this.position(this.cursor);
+        this.showCursor(this.cursor);
         this.click(2);
       }
       this.points.delete(event.pointerId);
@@ -282,6 +310,7 @@ export class RemoteTouch {
     ) {
       this.cursor = this.cursor ?? { ...point };
       this.position(this.cursor);
+      this.showCursor(this.cursor);
       this.click();
     }
     this.points.delete(event.pointerId);
@@ -311,6 +340,8 @@ export class RemoteTouch {
   };
   dispose() {
     this.cancel();
+    this.cursorEl?.remove();
+    this.cursorEl = undefined;
     this.abort.abort();
   }
 }
