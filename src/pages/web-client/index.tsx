@@ -1681,6 +1681,16 @@ export default function WebClientPage() {
                     </p>
                     {authenticating && (
                       <div className={styles.authForm}>
+                        {error === 'password' && (
+                          <Alert
+                            type="warning"
+                            showIcon
+                            message={text(
+                              'error.password',
+                              'The remote device denied that password. Try again.',
+                            )}
+                          />
+                        )}
                         <Input.Password
                           aria-label={text(
                             'password',
@@ -2730,7 +2740,7 @@ export default function WebClientPage() {
                 </span>
               </div>
             )}
-            {error && (
+            {error && error !== 'password' && (
               <Alert
                 type={error === 'password' ? 'warning' : 'error'}
                 showIcon
