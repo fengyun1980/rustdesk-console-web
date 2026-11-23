@@ -175,4 +175,9 @@ export default {
   'webClient.qualityBalanced': 'Equilibrada',
   'webClient.qualityBest': 'Máxima calidad',
   'webClient.frameRate': 'Límite de FPS',
+  'webClient.error.protocolProtocolRendezvous': 'El servidor devolvió una respuesta de negociación no reconocida (sin resultado de retransmisión ni de conexión directa).',
+  'webClient.error.protocolProtocolHash': 'El dispositivo remoto envió un desafío de contraseña no válido.',
+  'webClient.error.protocolProtocolLogin': 'La respuesta de inicio de sesión remota no contenía ni error ni información del dispositivo.',
+  'webClient.error.protocolProtocolPeerInfo': 'La información de pantalla del escritorio remoto no superó la validación. Puede que la resolución o el número de pantallas esté fuera de rango.',
+
 };

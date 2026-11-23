@@ -13,6 +13,10 @@ export type SessionErrorCode =
   | 'cancelled'
   | 'overload'
   | 'protocol'
+  | 'protocolRendezvous'
+  | 'protocolHash'
+  | 'protocolLogin'
+  | 'protocolPeerInfo'
   | 'offline'
   | 'password'
   | 'denied';

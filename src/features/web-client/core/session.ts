@@ -365,7 +365,7 @@ export class RemoteSession {
       const relay = response.relayResponse;
       if (!relay) {
         const failure = response.punchHoleResponse;
-        if (!failure) throw new SessionError('protocol');
+        if (!failure) throw new SessionError('protocolRendezvous');
         if (failure.failure === hbb.PunchHoleResponse.Failure.LICENSE_MISMATCH)
           throw new SessionError('identityLicense');
         if (
@@ -531,7 +531,7 @@ export class RemoteSession {
             salt.length > 4096 ||
             challenge.length > 4096
           )
-            throw new SessionError('protocol');
+            throw new SessionError('protocolHash');
           this.challenge = { salt, challenge };
           if (this.reuse && this.reuse.salt === salt)
             await this.submitAuthentication(undefined, true);
@@ -607,7 +607,7 @@ export class RemoteSession {
               (this.kind === 'desktop' &&
                 selected >= (response.peerInfo.displays?.length || 0))
             )
-              throw new SessionError('protocol');
+              throw new SessionError('protocolPeerInfo');
             clearTimeout(this.authTimer);
             this.displays = response.peerInfo.displays || [];
             this.displayCatalog.updatePeer(response.peerInfo);
@@ -638,7 +638,7 @@ export class RemoteSession {
                   },
                 },
               });
-          } else throw new SessionError('protocol');
+          } else throw new SessionError('protocolLogin');
         } else if (message.testDelay && !message.testDelay.fromClient) {
           this.testDelayReceived = Math.min(
             this.testDelayReceived + 1,
@@ -706,7 +706,7 @@ export class RemoteSession {
               (peer.currentDisplay ?? 0) < 0 ||
               (peer.currentDisplay ?? 0) >= peer.displays.length
             )
-              throw new SessionError('protocol');
+              throw new SessionError('protocolPeerInfo');
             this.displays = peer.displays;
             this.displayCatalog.updatePeer(peer);
             if (!this.updateEncoding(peer.encoding)) return;

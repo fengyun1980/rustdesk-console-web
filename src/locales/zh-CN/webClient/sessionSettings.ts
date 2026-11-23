@@ -152,4 +152,9 @@ export default {
   'webClient.qualityBalanced': '均衡',
   'webClient.qualityBest': '最佳',
   'webClient.frameRate': '帧率上限',
+  'webClient.error.protocolProtocolRendezvous': '服务器返回了无法识别的握手回复（未得到中继或打洞结果）。',
+  'webClient.error.protocolProtocolHash': '被控端返回的密码挑战数据异常，无法继续认证。',
+  'webClient.error.protocolProtocolLogin': '被控端登录响应缺少桌面信息（既无错误也无设备信息）。',
+  'webClient.error.protocolProtocolPeerInfo': '被控端返回的桌面/显示信息校验失败，可能是分辨率或显示数量超出支持范围。',
+
 };
