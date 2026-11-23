@@ -178,9 +178,8 @@ export default {
   'webClient.qualityBalanced': 'Équilibrée',
   'webClient.qualityBest': 'Qualité maximale',
   'webClient.frameRate': 'Limite d’images/s',
-  'webClient.error.protocolProtocolRendezvous': 'Le serveur a renvoyé une réponse de négociation non reconnue (aucun résultat de relais ni de connexion directe).',
-  'webClient.error.protocolProtocolHash': 'Le dispositif distant a envoyé un défi de mot de passe invalide.',
-  'webClient.error.protocolProtocolLogin': 'La réponse de connexion distante ne contenait ni erreur ni informations sur l\'appareil.',
-  'webClient.error.protocolProtocolPeerInfo': 'Les informations d\'écran du bureau distant ont échoué à la validation. La résolution ou le nombre d\'écrans est peut-être hors limites.',
-
+  'webClient.error.protocolRendezvous': 'Le serveur a renvoyé une réponse de négociation non reconnue (aucun résultat de relais ni de connexion directe).',
+  'webClient.error.protocolHash': 'Le dispositif distant a envoyé un défi de mot de passe invalide.',
+  'webClient.error.protocolLogin': 'La réponse de connexion distante ne contenait ni erreur ni informations sur l\'appareil.',
+  'webClient.error.protocolPeerInfo': 'Les informations d\'écran du bureau distant ont échoué à la validation. La résolution ou le nombre d\'écrans est peut-être hors limites.',
 };

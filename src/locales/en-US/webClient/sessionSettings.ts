@@ -170,9 +170,8 @@ export default {
   'webClient.qualityBalanced': 'Balanced',
   'webClient.qualityBest': 'Best quality',
   'webClient.frameRate': 'Frame rate limit',
-  'webClient.error.protocolProtocolRendezvous': 'The server returned an unrecognized handshake reply (no relay or punch-hole result).',
-  'webClient.error.protocolProtocolHash': 'The remote device sent an invalid password challenge.',
-  'webClient.error.protocolProtocolLogin': 'The remote login response contained neither an error nor device information.',
-  'webClient.error.protocolProtocolPeerInfo': 'Remote desktop/display information failed validation. The resolution or display count may be out of range.',
-
+  'webClient.error.protocolRendezvous': 'The server returned an unrecognized handshake reply (no relay or punch-hole result).',
+  'webClient.error.protocolHash': 'The remote device sent an invalid password challenge.',
+  'webClient.error.protocolLogin': 'The remote login response contained neither an error nor device information.',
+  'webClient.error.protocolPeerInfo': 'Remote desktop/display information failed validation. The resolution or display count may be out of range.',
 };

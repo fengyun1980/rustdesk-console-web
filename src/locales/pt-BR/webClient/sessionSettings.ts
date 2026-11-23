@@ -168,9 +168,8 @@ export default {
   'webClient.qualityBalanced': 'Equilibrada',
   'webClient.qualityBest': 'Melhor qualidade',
   'webClient.frameRate': 'Limite de FPS',
-  'webClient.error.protocolProtocolRendezvous': 'O servidor retornou uma resposta de negociação não reconhecida (sem resultado de retransmissão ou conexão direta).',
-  'webClient.error.protocolProtocolHash': 'O dispositivo remoto enviou um desafio de senha inválido.',
-  'webClient.error.protocolProtocolLogin': 'A resposta de login remota não continha erro nem informações do dispositivo.',
-  'webClient.error.protocolProtocolPeerInfo': 'As informações de tela da área de trabalho remota falharam na validação. A resolução ou a quantidade de telas pode estar fora do limite.',
-
+  'webClient.error.protocolRendezvous': 'O servidor retornou uma resposta de negociação não reconhecida (sem resultado de retransmissão ou conexão direta).',
+  'webClient.error.protocolHash': 'O dispositivo remoto enviou um desafio de senha inválido.',
+  'webClient.error.protocolLogin': 'A resposta de login remota não continha erro nem informações do dispositivo.',
+  'webClient.error.protocolPeerInfo': 'As informações de tela da área de trabalho remota falharam na validação. A resolução ou a quantidade de telas pode estar fora do limite.',
 };

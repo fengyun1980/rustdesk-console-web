@@ -172,9 +172,8 @@ export default {
   'webClient.qualityBalanced': 'Сбалансированно',
   'webClient.qualityBest': 'Лучшее качество',
   'webClient.frameRate': 'Предел FPS',
-  'webClient.error.protocolProtocolRendezvous': 'Сервер вернул нераспознанный ответ рукопожатия (нет результата ретрансляции или прямого подключения).',
-  'webClient.error.protocolProtocolHash': 'Удалённое устройство отправило некорректный запрос пароля.',
-  'webClient.error.protocolProtocolLogin': 'Ответ удалённого входа не содержит ни ошибки, ни сведений об устройстве.',
-  'webClient.error.protocolProtocolPeerInfo': 'Сведения об экранах удалённого рабочего стола не прошли проверку. Возможно, разрешение или число экранов вне допустимого диапазона.',
-
+  'webClient.error.protocolRendezvous': 'Сервер вернул нераспознанный ответ рукопожатия (нет результата ретрансляции или прямого подключения).',
+  'webClient.error.protocolHash': 'Удалённое устройство отправило некорректный запрос пароля.',
+  'webClient.error.protocolLogin': 'Ответ удалённого входа не содержит ни ошибки, ни сведений об устройстве.',
+  'webClient.error.protocolPeerInfo': 'Сведения об экранах удалённого рабочего стола не прошли проверку. Возможно, разрешение или число экранов вне допустимого диапазона.',
 };
