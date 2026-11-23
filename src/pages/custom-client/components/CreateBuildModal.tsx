@@ -382,6 +382,11 @@ const CreateBuildModal: React.FC<CreateBuildModalProps> = ({
             </Col>
           </Row>
 
+          {/* 盐仍自动生成并随配置提交，只是不再展示；后端会用它对密码做哈希 */}
+          <Form.Item name="salt" hidden>
+            <Input />
+          </Form.Item>
+
           <Form.Item
             name="conn-type"
             label={intl.formatMessage({
