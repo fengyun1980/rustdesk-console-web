@@ -95,7 +95,9 @@ const CreateBuildModal: React.FC<CreateBuildModalProps> = ({
     React.useState<StrategyConfigValues>({});
   const [releases, setReleases] = React.useState<API.RustdeskRelease[]>([]);
   const osValue = Form.useWatch('os', form);
-  const versionValue = Form.useWatch('version', form);
+  const [strategyVersion, setStrategyVersion] = React.useState<
+    string | undefined
+  >();
   const isAllOs = osValue === 'all';
   const availableArchs =
     osValue && OS_ARCH_MAP[osValue]
@@ -112,10 +114,12 @@ const CreateBuildModal: React.FC<CreateBuildModalProps> = ({
       });
       setCurrentStep(0);
       setStrategyConfig({});
+      setStrategyVersion(undefined);
     } else {
       form.resetFields();
       setCurrentStep(0);
       setStrategyConfig({});
+      setStrategyVersion(undefined);
     }
   }, [open, form]);
 
@@ -158,6 +162,8 @@ const CreateBuildModal: React.FC<CreateBuildModalProps> = ({
   const handleNext = async () => {
     try {
       await form.validateFields();
+      // 表单在步骤 1 会卸载，useWatch 失效，这里先固定当前选择的版本用于过滤
+      setStrategyVersion(form.getFieldValue('version') || undefined);
       setCurrentStep(1);
     } catch {
       // validation errors shown by form
@@ -419,7 +425,7 @@ const CreateBuildModal: React.FC<CreateBuildModalProps> = ({
           <StrategyConfigStep
             value={strategyConfig}
             onChange={setStrategyConfig}
-            version={versionValue}
+            version={strategyVersion}
           />
         </div>
       )}

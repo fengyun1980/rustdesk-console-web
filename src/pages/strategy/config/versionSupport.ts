@@ -113,8 +113,7 @@ export function isOptionSupported(
   key: string,
   version?: string | null,
 ): boolean {
-  const min = OPTION_MIN_VERSION[key];
-  if (!min) return true;
+  const min = OPTION_MIN_VERSION[key] ?? '1.3.7';
   if (!version) return true;
   if (min === 'latest') return false;
   return compareVersion(version, min) >= 0;

@@ -480,6 +480,21 @@ const StrategyConfigStep: React.FC<StrategyConfigStepProps> = ({
         </div>
       </div>
 
+      <div style={{ color: '#999', fontSize: 12, marginBottom: 8 }}>
+        {version ? (
+          <FormattedMessage
+            id="pages.customClient.filteredByVersion"
+            defaultMessage="Only showing options supported by RustDesk {version}"
+            values={{ version }}
+          />
+        ) : (
+          <FormattedMessage
+            id="pages.customClient.allVersions"
+            defaultMessage="No RustDesk version selected — showing all options"
+          />
+        )}
+      </div>
+
       {allCategories.length === 0 ? (
         <Empty
           description={intl.formatMessage({
