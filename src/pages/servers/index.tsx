@@ -937,7 +937,7 @@ const Servers: React.FC = () => {
                 )}
               </Form.Item>
             ))}
-            <Space wrap>
+            <Space wrap className="form-actions">
               <Button
                 htmlType="submit"
                 type="primary"
@@ -1108,14 +1108,18 @@ const Servers: React.FC = () => {
             >
               <Input.TextArea rows={6} />
             </Form.Item>
-            <Button
-              type="primary"
-              htmlType="submit"
-              loading={busy}
-              disabled={!primary?.reachable || !bansDirty || bansTargetChanged}
-            >
-              {t('保存规则', 'Save rules')}
-            </Button>
+            <div className="form-actions">
+              <Button
+                type="primary"
+                htmlType="submit"
+                loading={busy}
+                disabled={
+                  !primary?.reachable || !bansDirty || bansTargetChanged
+                }
+              >
+                {t('保存规则', 'Save rules')}
+              </Button>
+            </div>
           </Form>
         </>
       )}

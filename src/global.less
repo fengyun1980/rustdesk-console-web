@@ -184,6 +184,10 @@ ol {
   .ant-card .ant-card-head-title {
     font-size: 14px;
   }
+  // 卡片右上角操作按钮始终贴右，空间不够时换行也不左移
+  .ant-card .ant-card-head .ant-card-extra {
+    margin-inline-start: auto;
+  }
 
   // 数据概览字号收敛，避免一屏只放得下一个数字
   .ant-statistic-content,
@@ -280,10 +284,12 @@ ol {
 
     .ant-pro-table-list-toolbar-right {
       flex-wrap: wrap;
-      gap: 4px;
+      gap: 8px;
+      margin-inline-start: auto;
+      justify-content: flex-end;
     }
     .ant-btn {
-      padding-inline: 8px;
+      padding-inline: 10px;
       font-size: 12px;
     }
   }
@@ -456,18 +462,32 @@ ol {
       flex-wrap: wrap;
       align-items: center;
       justify-content: flex-end;
-      gap: 4px;
+      gap: 8px;
       margin-top: 2px;
       padding-top: 8px;
       border-top: 1px dashed var(--ant-color-split, rgba(5, 5, 5, 0.06));
 
       .ant-btn {
         border-radius: 999px;
+        margin-inline-start: 0 !important;
       }
       .ant-divider-vertical {
         display: none;
       }
     }
+  }
+}
+
+// 表单底部操作区：统一右对齐，多个按钮之间保留足够间距，避免挤在一起
+.form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+
+  .ant-btn {
+    margin-inline-start: 0 !important;
   }
 }
 

@@ -482,7 +482,10 @@ const GeneralSettings: React.FC = () => {
             items={masonryItems}
           />
 
-          <Form.Item style={{ marginTop: 28, marginBottom: 0 }}>
+          <Form.Item
+            className="form-actions"
+            style={{ marginTop: 28, marginBottom: 0 }}
+          >
             <Button
               type="primary"
               htmlType="submit"

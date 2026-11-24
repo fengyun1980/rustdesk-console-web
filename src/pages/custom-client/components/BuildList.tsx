@@ -639,7 +639,10 @@ const BuildList: React.FC<BuildListProps> = ({
       render: (_: React.ReactNode, record: API.CustomClientBuild) => {
         const files = renderFileLinks(record);
         return (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <div
+            className="mobile-card custom-client-mobile-card"
+            style={{ display: 'flex', flexDirection: 'column', gap: 8 }}
+          >
             <div
               style={{
                 display: 'flex',
@@ -714,6 +717,7 @@ const BuildList: React.FC<BuildListProps> = ({
   return (
     <ProTable<API.CustomClientBuild>
       className={`custom-client-build-table${isMobile ? ' mobile-card-table' : ''}`}
+      showHeader={!isMobile}
       headerTitle={
         <Title level={5} style={{ margin: 0 }}>
           <FormattedMessage
