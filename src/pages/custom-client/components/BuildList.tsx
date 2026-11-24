@@ -638,6 +638,8 @@ const BuildList: React.FC<BuildListProps> = ({
       key: 'mobileBuild',
       render: (_: React.ReactNode, record: API.CustomClientBuild) => {
         const files = renderFileLinks(record);
+        const actions = renderActionItems(record, false);
+        const [primaryAction, ...restActions] = actions;
         return (
           <div
             className="mobile-card custom-client-mobile-card"
@@ -680,7 +682,15 @@ const BuildList: React.FC<BuildListProps> = ({
               <div className="custom-client-mobile-files">{files}</div>
             )}
             <div className="custom-client-mobile-actions">
-              {renderActionItems(record, false)}
+              {primaryAction}
+              {restActions.length > 0 && (
+                <span className="custom-client-mobile-actions__divider" />
+              )}
+              {restActions.length > 0 && (
+                <div className="custom-client-mobile-actions__rest">
+                  {restActions}
+                </div>
+              )}
             </div>
           </div>
         );
