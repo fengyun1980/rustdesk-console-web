@@ -512,22 +512,58 @@ ol {
   cursor: col-resize;
 }
 
-// 移动端构建卡片的产物文件：居中显示，和底部操作区分开
+// 移动端构建卡片的产物文件：单排显示，第一个靠左、其余靠右，中间一条短竖线分隔
 .custom-client-mobile-files {
   display: flex;
-  flex-direction: column;
+  flex-wrap: nowrap;
   align-items: center;
-  gap: 6px;
-  padding: 0 8px;
-  text-align: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 0 4px;
 
-  // 每个产物文件一行；单行超长时省略，完整名称见 title
+  // 单行超长时省略，完整名称见 title
   a {
-    max-width: 100%;
+    min-width: 0;
     overflow: hidden;
     line-height: 1.8;
     white-space: nowrap;
     text-overflow: ellipsis;
+  }
+
+  > a:first-child {
+    flex: 1 1 0;
+    text-align: left;
+  }
+
+  &__divider {
+    flex: 0 0 auto;
+    width: 1px;
+    height: 14px;
+    background: var(--ant-color-split, rgba(5, 5, 5, 0.12));
+  }
+
+  &__rest {
+    display: flex;
+    flex: 1 1 0;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    min-width: 0;
+
+    a {
+      flex: 0 1 auto;
+      text-align: right;
+    }
+  }
+
+  // 只有一个安装包时居中显示
+  &--single {
+    justify-content: center;
+
+    > a:first-child {
+      flex: 0 1 auto;
+      text-align: center;
+    }
   }
 }
 
@@ -544,50 +580,17 @@ ol {
   }
 }
 
-// 移动端构建卡片底部操作区：单排显示，主操作靠左、其余靠右，中间一条短竖线分隔
+// 移动端构建卡片底部操作区：分隔线 + 胶囊按钮 + 悬浮反馈
 .custom-client-mobile-actions {
   display: flex;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
-  gap: 10px;
+  justify-content: space-evenly;
+  gap: 12px;
   margin-top: 2px;
   padding-top: 8px;
-  padding-inline: 4px;
+  padding-inline: 16px;
   border-top: 1px solid var(--ant-color-split, rgba(5, 5, 5, 0.06));
-
-  &__divider {
-    flex: 0 0 auto;
-    width: 1px;
-    height: 14px;
-    background: var(--ant-color-split, rgba(5, 5, 5, 0.12));
-  }
-
-  &__rest {
-    display: flex;
-    flex: 1 1 0;
-    flex-wrap: nowrap;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 10px;
-    min-width: 0;
-  }
-
-  // 主操作用弹性宽度顶住左侧，让中间那条竖线正好落在卡片中线附近
-  > .ant-btn:first-child {
-    flex: 1 1 0;
-    justify-content: flex-start;
-  }
-
-  // 只有一个操作时保持居中，不要孤零零贴在左边
-  &--single {
-    justify-content: center;
-
-    > .ant-btn:first-child {
-      flex: 0 1 auto;
-      justify-content: center;
-    }
-  }
 
   .ant-btn {
     padding-inline: 10px;
