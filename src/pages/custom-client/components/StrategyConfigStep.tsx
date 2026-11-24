@@ -9,8 +9,8 @@ import {
   Segmented,
   Empty,
 } from 'antd';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { getStrategyList } from '@/services/rustdesk-console';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { getStrategy, getStrategyList } from '@/services/rustdesk-console';
 import { getWebClientSettings } from '@/services/rustdesk-console/webClientSettings';
 import {
   type ConfigOption,
@@ -274,6 +274,8 @@ const StrategyConfigStep: React.FC<StrategyConfigStepProps> = ({
   const [selectedStrategyGuid, setSelectedStrategyGuid] = useState<
     string | undefined
   >();
+  const [strategyLoading, setStrategyLoading] = useState(false);
+  const strategyRequestRef = useRef(0);
   const [localValue, setLocalValue] = useState<StrategyConfigValues>({
     ...value,
   });
@@ -339,21 +341,37 @@ const StrategyConfigStep: React.FC<StrategyConfigStepProps> = ({
     [localValue, onChange],
   );
 
-  const handleStrategySelect = (guid: string) => {
+  const handleStrategySelect = async (guid: string) => {
     setSelectedStrategyGuid(guid);
-    const strategy = strategyList.find((s) => s.guid === guid);
-    const configOptions = strategy?.config_options ?? {};
-    const newValues: StrategyConfigValues = {};
-    Object.entries(configOptions).forEach(([key, val]) => {
-      if (configOptionsMap[key] && isOptionSupported(key, version)) {
-        newValues[key] = { mode: 'default', value: val };
+    const requestId = ++strategyRequestRef.current;
+    setStrategyLoading(true);
+    try {
+      // 列表接口不返回配置项，需按 guid 取详情后再带入
+      const detail = await getStrategy(guid);
+      if (requestId !== strategyRequestRef.current) return;
+      const configOptions = detail?.config_options ?? {};
+      const newValues: StrategyConfigValues = {};
+      Object.entries(configOptions).forEach(([key, val]) => {
+        if (configOptionsMap[key] && isOptionSupported(key, version)) {
+          newValues[key] = { mode: 'default', value: val };
+        }
+      });
+      setLocalValue(newValues);
+      onChange?.(newValues);
+    } catch {
+      if (requestId !== strategyRequestRef.current) return;
+      setLocalValue({});
+      onChange?.({});
+    } finally {
+      if (requestId === strategyRequestRef.current) {
+        setStrategyLoading(false);
       }
-    });
-    setLocalValue(newValues);
-    onChange?.(newValues);
+    }
   };
 
   const handleClearStrategy = () => {
+    strategyRequestRef.current += 1;
+    setStrategyLoading(false);
     setSelectedStrategyGuid(undefined);
     setLocalValue({});
     onChange?.({});
@@ -433,6 +451,7 @@ const StrategyConfigStep: React.FC<StrategyConfigStepProps> = ({
         <Select
           style={{ flex: 1 }}
           allowClear
+          loading={strategyLoading}
           placeholder={intl.formatMessage({
             id: 'pages.customClient.selectStrategyPlaceholder',
             defaultMessage: 'Select a strategy as base preset (optional)',
@@ -440,14 +459,16 @@ const StrategyConfigStep: React.FC<StrategyConfigStepProps> = ({
           value={selectedStrategyGuid}
           onChange={(val) => {
             if (val) {
-              handleStrategySelect(val);
+              void handleStrategySelect(val);
             } else {
               handleClearStrategy();
             }
           }}
           options={strategyList.map((s) => ({
             value: s.guid,
-            label: s.name,
+            label: s.rustdesk_version
+              ? `${s.name} (${s.rustdesk_version})`
+              : s.name,
           }))}
         />
         <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
