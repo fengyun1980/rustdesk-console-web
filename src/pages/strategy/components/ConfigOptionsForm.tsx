@@ -1,6 +1,7 @@
 import { FormattedMessage, useIntl } from '@umijs/max';
 import {
   Button,
+  Grid,
   Input,
   InputNumber,
   Select,
@@ -245,6 +246,9 @@ const ConfigOptionsForm: React.FC<ConfigOptionsFormProps> = ({
   version,
 }) => {
   const intl = useIntl();
+  const screens = Grid.useBreakpoint();
+  const isMobile = screens.md === false;
+  const [activeCategory, setActiveCategory] = useState<string>();
   const [localValue, setLocalValue] = useState<Record<string, string>>({
     ...value,
   });
@@ -318,6 +322,10 @@ const ConfigOptionsForm: React.FC<ConfigOptionsFormProps> = ({
       };
     });
 
+  const currentCategoryKey =
+    tabItems.find((item) => item.key === activeCategory)?.key ??
+    tabItems[0]?.key;
+
   return (
     <div>
       {version && (
@@ -354,7 +362,22 @@ const ConfigOptionsForm: React.FC<ConfigOptionsFormProps> = ({
         )}
       </div>
       {tabItems.length > 0 ? (
-        <Tabs items={tabItems} size="small" />
+        isMobile ? (
+          <div>
+            <Select
+              style={{ width: '100%', marginBottom: 12 }}
+              value={currentCategoryKey}
+              onChange={setActiveCategory}
+              options={tabItems.map((item) => ({
+                value: item.key,
+                label: item.label,
+              }))}
+            />
+            {tabItems.find((item) => item.key === currentCategoryKey)?.children}
+          </div>
+        ) : (
+          <Tabs items={tabItems} size="small" />
+        )
       ) : (
         <div style={{ color: '#999', fontSize: 13 }}>
           <FormattedMessage

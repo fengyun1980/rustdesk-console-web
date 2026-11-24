@@ -1,13 +1,14 @@
 import { FormattedMessage, useIntl } from '@umijs/max';
 import {
+  Empty,
+  Grid,
   Input,
   InputNumber,
   Select,
+  Segmented,
   Switch,
   Tabs,
   Tooltip,
-  Segmented,
-  Empty,
 } from 'antd';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { getStrategy, getStrategyList } from '@/services/rustdesk-console';
@@ -270,6 +271,9 @@ const StrategyConfigStep: React.FC<StrategyConfigStepProps> = ({
   version,
 }) => {
   const intl = useIntl();
+  const screens = Grid.useBreakpoint();
+  const isMobile = screens.md === false;
+  const [activeCategory, setActiveCategory] = useState<string>();
   const [strategyList, setStrategyList] = useState<API.StrategyItem[]>([]);
   const [selectedStrategyGuid, setSelectedStrategyGuid] = useState<
     string | undefined
@@ -437,6 +441,10 @@ const StrategyConfigStep: React.FC<StrategyConfigStepProps> = ({
     [allCategories, localValue, handleChange, intl, version],
   );
 
+  const currentCategoryKey =
+    tabItems.find((item) => item.key === activeCategory)?.key ??
+    tabItems[0]?.key;
+
   return (
     <div>
       <div
@@ -523,6 +531,19 @@ const StrategyConfigStep: React.FC<StrategyConfigStepProps> = ({
             defaultMessage: 'No strategy options available',
           })}
         />
+      ) : isMobile ? (
+        <div>
+          <Select
+            style={{ width: '100%', marginBottom: 12 }}
+            value={currentCategoryKey}
+            onChange={setActiveCategory}
+            options={tabItems.map((item) => ({
+              value: item.key,
+              label: item.label,
+            }))}
+          />
+          {tabItems.find((item) => item.key === currentCategoryKey)?.children}
+        </div>
       ) : (
         <Tabs items={tabItems} size="small" />
       )}
