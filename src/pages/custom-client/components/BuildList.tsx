@@ -681,7 +681,13 @@ const BuildList: React.FC<BuildListProps> = ({
             {files.length > 0 && (
               <div className="custom-client-mobile-files">{files}</div>
             )}
-            <div className="custom-client-mobile-actions">
+            <div
+              className={`custom-client-mobile-actions${
+                restActions.length === 0
+                  ? ' custom-client-mobile-actions--single'
+                  : ''
+              }`}
+            >
               {primaryAction}
               {restActions.length > 0 && (
                 <span className="custom-client-mobile-actions__divider" />
