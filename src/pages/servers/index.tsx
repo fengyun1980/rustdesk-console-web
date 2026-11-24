@@ -8,6 +8,7 @@ import {
   Col,
   Descriptions,
   Form,
+  Grid,
   Input,
   Popconfirm,
   Row,
@@ -18,6 +19,7 @@ import {
   Tabs,
   Tag,
   Typography,
+  type TableColumnsType,
 } from 'antd';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
@@ -38,6 +40,7 @@ import {
 } from '@/services/rustdesk-console/server';
 import NetworkSettings from './network';
 import { useUnsavedChanges } from './useUnsavedChanges';
+import MobileListCard from '@/components/MobileListCard';
 
 interface Instance {
   key: string;
@@ -80,6 +83,8 @@ const Servers: React.FC = () => {
     intl.formatMessage({ id: `pages.servers.network.${key}` });
   const access = useAccess();
   const { message, modal } = App.useApp();
+  const screens = Grid.useBreakpoint();
+  const isMobile = screens.md === false;
   const [nodes, setNodes] = useState<ServerNode[]>([]);
   const [target, setTarget] = useState<Instance | null>(null);
   const [relayFilter, setRelayFilter] = useState<string | null>(null);
@@ -590,6 +595,124 @@ const Servers: React.FC = () => {
     </Space>
   );
 
+  const sessionRelayName = (item: ManagedSession) =>
+    nodes.find((entry) => entry.id === item.relay_id)?.name || item.relay_id;
+
+  const renderSessionAction = (item: ManagedSession) => {
+    const owner = nodes.find((entry) => entry.id === item.relay_id);
+    const ready =
+      owner?.reachable &&
+      owner.services.some(
+        (entry) => entry.service === 'hbbr' && entry.available,
+      );
+    return (
+      <Popconfirm
+        title={t(
+          `关闭 ${owner?.name || item.relay_id} 上的这条中继会话？`,
+          `Close this relay session on ${owner?.name || item.relay_id}?`,
+        )}
+        onConfirm={() =>
+          run(async () => {
+            requireInstance({
+              key: '',
+              nodeId: item.relay_id,
+              service: 'hbbr',
+              label: owner?.name || item.relay_id,
+            });
+            await disconnectRelaySession(item.relay_id, item.uuid);
+            message.success(t('关闭请求已提交。', 'Session close requested.'));
+          })
+        }
+        okButtonProps={{ disabled: busy || !ready }}
+      >
+        <Button danger disabled={busy || item.closing || !ready}>
+          {item.closing ? t('关闭中', 'Closing') : t('断开', 'Disconnect')}
+        </Button>
+      </Popconfirm>
+    );
+  };
+
+  // 窄屏把中继会话表格改成卡片（该表没有固定列/展开行）；
+  // 桌面端仍使用原有的完整列定义。
+  const sessionColumns: TableColumnsType<ManagedSession> = isMobile
+    ? [
+        {
+          title: t('会话', 'Session'),
+          key: 'mobileCard',
+          render: (_, item) => (
+            <MobileListCard
+              title={sessionRelayName(item)}
+              subtitle={item.uuid}
+              rows={[
+                {
+                  label: t('目标 ID', 'Target ID'),
+                  value:
+                    [item.target_id, item.peer_target_id]
+                      .filter(Boolean)
+                      .join(' / ') || '—',
+                },
+                {
+                  label: t('两端地址', 'Endpoints'),
+                  value: item.endpoints.join(' ↔ '),
+                },
+                { label: t('传输', 'Transport'), value: item.transport },
+                {
+                  label: t('开始时间', 'Started'),
+                  value: new Date(item.started_at * 1000).toLocaleString(
+                    intl.locale,
+                  ),
+                },
+                {
+                  label: t('流量（字节）', 'Traffic (bytes)'),
+                  value: item.bytes,
+                },
+                { label: 'B/s', value: item.bytes_per_second },
+              ]}
+              actions={
+                access.canServersDisconnect
+                  ? renderSessionAction(item)
+                  : undefined
+              }
+            />
+          ),
+        },
+      ]
+    : [
+        {
+          title: t('所属中继', 'Relay'),
+          render: (_, item) => sessionRelayName(item),
+        },
+        { title: 'UUID', dataIndex: 'uuid' },
+        {
+          title: t('请求中的目标 ID', 'Reported target ID'),
+          render: (_, item) =>
+            [item.target_id, item.peer_target_id]
+              .filter(Boolean)
+              .join(' / ') || '—',
+        },
+        {
+          title: t('两端地址', 'Endpoints'),
+          render: (_, item) => item.endpoints.join(' ↔ '),
+        },
+        { title: t('传输', 'Transport'), dataIndex: 'transport' },
+        {
+          title: t('开始时间', 'Started'),
+          render: (_, item) =>
+            new Date(item.started_at * 1000).toLocaleString(intl.locale),
+        },
+        { title: t('流量（字节）', 'Traffic (bytes)'), dataIndex: 'bytes' },
+        { title: 'B/s', dataIndex: 'bytes_per_second' },
+        ...(access.canServersDisconnect
+          ? [
+              {
+                title: t('操作', 'Action'),
+                render: (_: unknown, item: ManagedSession) =>
+                  renderSessionAction(item),
+              },
+            ]
+          : []),
+      ];
+
   const sessionTable = (
     <Space orientation="vertical" style={{ width: '100%' }}>
       <Select
@@ -680,89 +803,15 @@ const Servers: React.FC = () => {
         />
       )}
       <Table<ManagedSession>
+        className={isMobile ? 'mobile-card-table' : undefined}
+        showHeader={!isMobile}
         rowKey={(item) => JSON.stringify([item.relay_id, item.uuid])}
         dataSource={sessions}
-        scroll={{ x: 1200 }}
-        columns={[
-          {
-            title: t('所属中继', 'Relay'),
-            render: (_, item) =>
-              nodes.find((entry) => entry.id === item.relay_id)?.name ||
-              item.relay_id,
-          },
-          { title: 'UUID', dataIndex: 'uuid' },
-          {
-            title: t('请求中的目标 ID', 'Reported target ID'),
-            render: (_, item) =>
-              [item.target_id, item.peer_target_id]
-                .filter(Boolean)
-                .join(' / ') || '—',
-          },
-          {
-            title: t('两端地址', 'Endpoints'),
-            render: (_, item) => item.endpoints.join(' ↔ '),
-          },
-          { title: t('传输', 'Transport'), dataIndex: 'transport' },
-          {
-            title: t('开始时间', 'Started'),
-            render: (_, item) =>
-              new Date(item.started_at * 1000).toLocaleString(intl.locale),
-          },
-          { title: t('流量（字节）', 'Traffic (bytes)'), dataIndex: 'bytes' },
-          { title: 'B/s', dataIndex: 'bytes_per_second' },
-          ...(access.canServersDisconnect
-            ? [
-                {
-                  title: t('操作', 'Action'),
-                  render: (_: unknown, item: ManagedSession) => {
-                    const owner = nodes.find(
-                      (entry) => entry.id === item.relay_id,
-                    );
-                    const ready =
-                      owner?.reachable &&
-                      owner.services.some(
-                        (entry) => entry.service === 'hbbr' && entry.available,
-                      );
-                    return (
-                      <Popconfirm
-                        title={t(
-                          `关闭 ${owner?.name || item.relay_id} 上的这条中继会话？`,
-                          `Close this relay session on ${owner?.name || item.relay_id}?`,
-                        )}
-                        onConfirm={() =>
-                          run(async () => {
-                            requireInstance({
-                              key: '',
-                              nodeId: item.relay_id,
-                              service: 'hbbr',
-                              label: owner?.name || item.relay_id,
-                            });
-                            await disconnectRelaySession(
-                              item.relay_id,
-                              item.uuid,
-                            );
-                            message.success(
-                              t('关闭请求已提交。', 'Session close requested.'),
-                            );
-                          })
-                        }
-                        okButtonProps={{ disabled: busy || !ready }}
-                      >
-                        <Button
-                          danger
-                          disabled={busy || item.closing || !ready}
-                        >
-                          {item.closing
-                            ? t('关闭中', 'Closing')
-                            : t('断开', 'Disconnect')}
-                        </Button>
-                      </Popconfirm>
-                    );
-                  },
-                },
-              ]
-            : []),
-        ]}
+        scroll={isMobile ? undefined : { x: 1200 }}
+        pagination={
+          isMobile ? { showSizeChanger: false, showQuickJumper: false } : undefined
+        }
+        columns={sessionColumns}
       />
     </Space>
   );

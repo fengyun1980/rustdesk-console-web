@@ -11,6 +11,7 @@ import type { ProColumns } from '@ant-design/pro-components';
 import { FormattedMessage, useIntl } from '@umijs/max';
 import { Button, Divider, Popconfirm, Space, Tooltip } from 'antd';
 import React from 'react';
+import MobileListCard from '@/components/MobileListCard';
 import { getUserColumns } from '@/components/UserSelectTable/columns';
 import {
   canShowRoleAssignmentEntry,
@@ -21,6 +22,7 @@ import {
 
 interface UseUserColumnsOptions {
   userGroupGuid?: string;
+  isMobile?: boolean;
   isSuperAdmin: boolean;
   canEdit: boolean;
   canSecurity: boolean;
@@ -45,6 +47,7 @@ export const useUserColumns = (
   const intl = useIntl();
   const {
     userGroupGuid,
+    isMobile = false,
     isSuperAdmin,
     canEdit,
     canSecurity,
@@ -267,6 +270,30 @@ export const useUserColumns = (
       ),
   };
 
+  // 卡片与表格操作栏共用同一套权限判断，避免两处逻辑漂移
+  const renderActions = (record: API.UserItem): React.ReactNode => {
+    const renderAction = actionColumn.render as
+      | ((
+          dom: any,
+          entity: API.UserItem,
+          index: any,
+          action: any,
+          schema: any,
+        ) => React.ReactNode)
+      | undefined;
+    return renderAction ? renderAction(null, record, 0, {}, {}) : null;
+  };
+
+  const superAdminLabel = intl.formatMessage({
+    id: 'pages.users.superAdmin',
+    defaultMessage: 'Super administrator',
+  });
+  const ordinaryUserLabel = intl.formatMessage({
+    id: 'pages.users.normalUser',
+    defaultMessage: 'Ordinary user',
+  });
+  const showRoleColumn = isSuperAdmin || canRolesView;
+
   const roleColumn: ProColumns<API.UserItem> = {
     title: <FormattedMessage id="pages.users.roles" defaultMessage="Roles" />,
     dataIndex: 'role_names',
@@ -274,22 +301,109 @@ export const useUserColumns = (
     search: false,
     ellipsis: true,
     render: (_: unknown, record) =>
-      formatUserRoleNames(
-        record,
-        intl.formatMessage({
-          id: 'pages.users.superAdmin',
-          defaultMessage: 'Super administrator',
-        }),
-        intl.formatMessage({
-          id: 'pages.users.normalUser',
-          defaultMessage: 'Ordinary user',
-        }),
-      ),
+      formatUserRoleNames(record, superAdminLabel, ordinaryUserLabel),
   };
 
-  return [
+  // 窄屏改成卡片：用户名 + 状态 + 邮箱/角色/所属组/策略/备注，操作按钮放卡片底部
+  const mobileColumns: ProColumns<API.UserItem>[] = [
+    {
+      title: (
+        <FormattedMessage id="pages.users.list" defaultMessage="User List" />
+      ),
+      key: 'mobileCard',
+      search: false,
+      render: (_: unknown, record: API.UserItem) => {
+        const statusRender = baseColumns.find(
+          (col) => col.dataIndex === 'status',
+        )?.render as
+          | ((
+              dom: any,
+              entity: any,
+              index: any,
+              action: any,
+              schema: any,
+            ) => React.ReactNode)
+          | undefined;
+        return (
+          <MobileListCard
+            title={record.display_name || record.name}
+            badge={
+              statusRender
+                ? statusRender(record.status, record, 0, {}, {})
+                : undefined
+            }
+            subtitle={record.email || '-'}
+            rows={[
+              showRoleColumn && {
+                label: (
+                  <FormattedMessage
+                    id="pages.users.roles"
+                    defaultMessage="Roles"
+                  />
+                ),
+                value: formatUserRoleNames(
+                  record,
+                  superAdminLabel,
+                  ordinaryUserLabel,
+                ),
+              },
+              !userGroupGuid && {
+                label: (
+                  <FormattedMessage
+                    id="pages.users.userGroup"
+                    defaultMessage="User Group"
+                  />
+                ),
+                value: record.user_group_name || '-',
+              },
+              {
+                label: (
+                  <FormattedMessage
+                    id="pages.users.strategy"
+                    defaultMessage="Strategy"
+                  />
+                ),
+                value: record.strategy_name || '-',
+              },
+              record.note
+                ? {
+                    label: (
+                      <FormattedMessage
+                        id="pages.users.note"
+                        defaultMessage="Note"
+                      />
+                    ),
+                    value: record.note,
+                  }
+                : null,
+            ]}
+            actions={
+              actionColumn.hideInTable ? undefined : renderActions(record)
+            }
+          />
+        );
+      },
+    },
+  ];
+
+  const desktopColumns = [
     ...baseColumns,
-    ...(isSuperAdmin || canRolesView ? [roleColumn] : []),
+    ...(showRoleColumn ? [roleColumn] : []),
     actionColumn,
   ];
+
+  return isMobile
+    ? [
+        // 保留原列定义给查询表单使用，表格里只渲染卡片列
+        ...desktopColumns.map(
+          (col): ProColumns<API.UserItem> => ({ ...col, hideInTable: true }),
+        ),
+        ...mobileColumns,
+      ]
+    : [
+        ...desktopColumns,
+        ...mobileColumns.map(
+          (col): ProColumns<API.UserItem> => ({ ...col, hideInTable: true }),
+        ),
+      ];
 };

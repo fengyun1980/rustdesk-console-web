@@ -127,6 +127,16 @@ const DeviceList: React.FC<DeviceListProps> = ({
   };
 
   const handleDelete = async (guid: string) => {
+    if (!guid || guid === 'undefined' || guid === 'null') {
+      msgApi.error(
+        intl.formatMessage({
+          id: 'pages.devices.invalidDeviceId',
+          defaultMessage: 'Device identifier is missing, please refresh',
+        }),
+      );
+      actionRef.current?.reload();
+      return;
+    }
     try {
       await deleteDevice(guid);
       msgApi.success(
@@ -484,14 +494,10 @@ const DeviceList: React.FC<DeviceListProps> = ({
           .filter(Boolean)
           .join(' · ');
         return (
-          <div className="device-mobile-card">
-            <div className="device-mobile-card__head">
-              <span className="device-mobile-card__id">
-                {idRender
-                  ? idRender(record.id, record, 0, {}, {})
-                  : record.id || '-'}
-              </span>
-              <span className="device-mobile-card__status">
+          <div className="mobile-card">
+            <div className="mobile-card__head">
+              <span className="mobile-card__title">{deviceName}</span>
+              <span className="mobile-card__badge">
                 {record.status === 1 ? (
                   <CheckCircleOutlined style={{ color: '#52c41a' }} />
                 ) : record.status === 0 ? (
@@ -499,38 +505,55 @@ const DeviceList: React.FC<DeviceListProps> = ({
                 ) : null}
               </span>
             </div>
-            <div className="device-mobile-card__name">{deviceName}</div>
-            <div className="device-mobile-card__meta">
-              <span>
-                <FormattedMessage
-                  id="pages.devices.user"
-                  defaultMessage="User"
-                />
-                : {record.user_name || '-'}
-              </span>
-              <span>
-                <FormattedMessage
-                  id="pages.devices.deviceGroup"
-                  defaultMessage="Group"
-                />
-                : {record.device_group_name || '-'}
-              </span>
-              <span>
-                <FormattedMessage
-                  id="pages.devices.strategy"
-                  defaultMessage="Strategy"
-                />
-                : {record.strategy_name || '-'}
-              </span>
+            <div className="mobile-card__subtitle">
+              {idRender
+                ? idRender(record.id, record, 0, {}, {})
+                : record.id || '-'}
             </div>
-            {infoLine && (
-              <div className="device-mobile-card__meta">{infoLine}</div>
-            )}
-            {record.note && (
-              <div className="device-mobile-card__note">{record.note}</div>
-            )}
+            <div className="mobile-card__rows">
+              <div className="mobile-card__row">
+                <span className="mobile-card__label">
+                  <FormattedMessage
+                    id="pages.devices.user"
+                    defaultMessage="User"
+                  />
+                </span>
+                <span className="mobile-card__value">
+                  {record.user_name || '-'}
+                </span>
+              </div>
+              <div className="mobile-card__row">
+                <span className="mobile-card__label">
+                  <FormattedMessage
+                    id="pages.devices.deviceGroup"
+                    defaultMessage="Group"
+                  />
+                </span>
+                <span className="mobile-card__value">
+                  {record.device_group_name || '-'}
+                </span>
+              </div>
+              <div className="mobile-card__row">
+                <span className="mobile-card__label">
+                  <FormattedMessage
+                    id="pages.devices.strategy"
+                    defaultMessage="Strategy"
+                  />
+                </span>
+                <span className="mobile-card__value">
+                  {record.strategy_name || '-'}
+                </span>
+              </div>
+              {infoLine && (
+                <div className="mobile-card__row">
+                  <span className="mobile-card__label">IP / Ver</span>
+                  <span className="mobile-card__value">{infoLine}</span>
+                </div>
+              )}
+            </div>
+            {record.note && <div className="mobile-card__note">{record.note}</div>}
             {showActions && (
-              <div className="device-mobile-card__actions">
+              <div className="mobile-card__actions">
                 <DeviceActions record={record} {...actionCallbacks} />
               </div>
             )}
@@ -571,7 +594,7 @@ const DeviceList: React.FC<DeviceListProps> = ({
     >
       <PresenceAlert diagnostics={presenceDiagnostics} />
       <ProTable<API.DeviceItem>
-        className={isMobile ? 'device-mobile-table' : undefined}
+        className={isMobile ? 'mobile-card-table' : undefined}
         showHeader={!isMobile}
         headerTitle={
           <FormattedMessage

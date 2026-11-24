@@ -1,7 +1,7 @@
 import type { ActionType } from '@ant-design/pro-components';
 import { PageContainer } from '@ant-design/pro-components';
 import { FormattedMessage, useAccess, useIntl, useModel } from '@umijs/max';
-import { App, Form } from 'antd';
+import { App, Form, Grid } from 'antd';
 import React, { useEffect, useRef, useState } from 'react';
 import {
   batchForceLogout,
@@ -41,6 +41,8 @@ const UserList: React.FC<UserListProps> = ({
   const intl = useIntl();
   const { message: msgApi } = App.useApp();
   const access = useAccess();
+  const screens = Grid.useBreakpoint();
+  const isMobile = screens.md === false;
   const { initialState } = useModel('@@initialState');
   const currentUserGuid = initialState?.currentUser?.guid;
 
@@ -466,6 +468,7 @@ const UserList: React.FC<UserListProps> = ({
 
   const columns = useUserColumns({
     userGroupGuid,
+    isMobile,
     isSuperAdmin: access.isSuperAdmin,
     canEdit:
       access.canUsersEdit ||
@@ -502,6 +505,7 @@ const UserList: React.FC<UserListProps> = ({
     >
       <UserTable
         userGroupGuid={userGroupGuid}
+        isMobile={isMobile}
         columns={columns}
         actionRef={actionRef}
         selectedRowKeys={selectedRowKeys}

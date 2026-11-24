@@ -1,8 +1,8 @@
 import { PlusOutlined } from '@ant-design/icons';
-import type { ActionType } from '@ant-design/pro-components';
+import type { ActionType, ProColumns } from '@ant-design/pro-components';
 import { PageContainer, ProTable } from '@ant-design/pro-components';
 import { FormattedMessage, useAccess, useIntl, useModel } from '@umijs/max';
-import { App, Button } from 'antd';
+import { App, Button, Grid } from 'antd';
 import React, { useRef, useState } from 'react';
 import {
   createStrategy,
@@ -23,6 +23,8 @@ const StrategyList: React.FC = () => {
   const access = useAccess();
   const { initialState } = useModel('@@initialState');
   const { message: msgApi } = App.useApp();
+  const screens = Grid.useBreakpoint();
+  const isMobile = screens.md === false;
   const actionRef = useRef<ActionType>(null);
   const openRequestVersionRef = useRef(0);
 
@@ -132,7 +134,7 @@ const StrategyList: React.FC = () => {
     setAssignModalVisible(true);
   };
 
-  const columns = StrategyColumns({
+  const { columns: desktopColumns, mobileColumns } = StrategyColumns({
     onView: (record) => void openStrategy(record, 'view'),
     onEdit: (record) => void openStrategy(record, 'edit'),
     onDelete: handleDelete,
@@ -143,9 +145,32 @@ const StrategyList: React.FC = () => {
     canAssign: access.canStrategiesAssign,
   });
 
+  const columns = isMobile
+    ? [
+        // 保留原列定义给查询表单使用，表格里只渲染卡片列
+        ...desktopColumns.map(
+          (col): ProColumns<API.StrategyItem> => ({
+            ...col,
+            hideInTable: true,
+          }),
+        ),
+        ...mobileColumns,
+      ]
+    : [
+        ...desktopColumns,
+        ...mobileColumns.map(
+          (col): ProColumns<API.StrategyItem> => ({
+            ...col,
+            hideInTable: true,
+          }),
+        ),
+      ];
+
   return (
     <PageContainer>
       <ProTable<API.StrategyItem>
+        className={isMobile ? 'mobile-card-table' : undefined}
+        showHeader={!isMobile}
         headerTitle={
           <FormattedMessage
             id="pages.strategies.list"
@@ -175,8 +200,17 @@ const StrategyList: React.FC = () => {
           };
         }}
         columns={columns}
-        pagination={DEFAULT_PAGINATION}
-        scroll={{ x: 1000 }}
+        pagination={
+          isMobile
+            ? {
+                ...DEFAULT_PAGINATION,
+                simple: true,
+                showSizeChanger: false,
+                showQuickJumper: false,
+              }
+            : DEFAULT_PAGINATION
+        }
+        scroll={isMobile ? undefined : { x: 1000 }}
         toolBarRender={() =>
           access.canStrategiesCreate
             ? [

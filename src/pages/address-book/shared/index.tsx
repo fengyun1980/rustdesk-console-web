@@ -12,11 +12,13 @@ import {
   Button,
   Divider,
   Form,
+  Grid,
   Input,
   Modal,
   Popconfirm,
   Space,
 } from 'antd';
+import MobileListCard from '@/components/MobileListCard';
 import React, { useRef, useState } from 'react';
 import {
   addSharedAddressBook,
@@ -246,9 +248,65 @@ const SharedAddressBook: React.FC = () => {
       : []),
   ];
 
+  const screens = Grid.useBreakpoint();
+  const isMobile = screens.md === false;
+  const optionColumn = columns.find(
+    (column) => column.valueType === 'option',
+  );
+
+  // 窄屏改成卡片：名称/备注纵向排列，操作按钮放卡片底部
+  const mobileColumns: ProColumns<API.SharedAddressBook>[] = isMobile
+    ? [
+        {
+          title: 'Address Book',
+          key: 'mobileCard',
+          search: false,
+          render: (_: unknown, record: API.SharedAddressBook) => {
+            const actions = optionColumn?.render
+              ? (optionColumn.render(
+                  record.name,
+                  record,
+                  0,
+                  {} as never,
+                  {} as never,
+                ) as React.ReactNode)
+              : undefined;
+
+            return (
+              <MobileListCard
+                title={
+                  <a
+                    onClick={() =>
+                      history.push(`/address-book/shared/${record.guid}`)
+                    }
+                  >
+                    {record.name}
+                  </a>
+                }
+                rows={[
+                  {
+                    label: (
+                      <FormattedMessage
+                        id="pages.addressBook.note"
+                        defaultMessage="Note"
+                      />
+                    ),
+                    value: record.note || '-',
+                  },
+                ]}
+                actions={actions}
+              />
+            );
+          },
+        },
+      ]
+    : [];
+
   return (
     <PageContainer>
       <ProTable<API.SharedAddressBook>
+        className={isMobile ? 'mobile-card-table' : undefined}
+        showHeader={!isMobile}
         headerTitle={
           <FormattedMessage
             id="pages.addressBook.shared"
@@ -273,9 +331,21 @@ const SharedAddressBook: React.FC = () => {
           }
           return toTableResult(result);
         }}
-        columns={columns}
+        columns={
+          isMobile
+            ? [
+                ...columns.map(
+                  (column): ProColumns<API.SharedAddressBook> => ({
+                    ...column,
+                    hideInTable: true,
+                  }),
+                ),
+                ...mobileColumns,
+              ]
+            : [...columns, ...mobileColumns]
+        }
         rowSelection={
-          access.canAddressBooksEdit
+          !isMobile && access.canAddressBooksEdit
             ? {
                 selectedRowKeys,
                 onChange: setSelectedRowKeys,
@@ -340,7 +410,7 @@ const SharedAddressBook: React.FC = () => {
           fullScreen: false,
           reload: true,
         }}
-        scroll={{ x: 800 }}
+        scroll={isMobile ? undefined : { x: 800 }}
       />
 
       <Modal

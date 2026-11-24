@@ -15,6 +15,7 @@ import {
   Button,
   Divider,
   Form,
+  Grid,
   Input,
   Modal,
   Popconfirm,
@@ -26,6 +27,7 @@ import {
   Tree,
 } from 'antd';
 import React, { useMemo, useRef, useState } from 'react';
+import MobileListCard from '@/components/MobileListCard';
 import { getPermissionList } from '@/services/rustdesk-console/permission';
 import {
   createRole,
@@ -72,6 +74,8 @@ const RoleList: React.FC = () => {
   const intl = useIntl();
   const { message: msgApi } = App.useApp();
   const access = useAccess();
+  const screens = Grid.useBreakpoint();
+  const isMobile = screens.md === false;
   const isOwner = access.isSuperAdmin;
   const actionRef = useRef<ActionType>(null);
   const [form] = Form.useForm<API.CreateRoleParams>();
@@ -412,111 +416,176 @@ const RoleList: React.FC = () => {
         </Tag>
       ),
     },
+  ];
+
+  // 卡片与表格操作栏共用同一套权限判断，避免两处逻辑漂移
+  const renderRoleActions = (record: RoleListRow): React.ReactNode => (
+    <Space size={0} separator={<Divider orientation="vertical" />}>
+      {isBuiltInRoleRow(record) ? (
+        <Button
+          key="view-built-in"
+          type="link"
+          size="small"
+          icon={<EyeOutlined />}
+          onClick={() => void openSystemIdentity(record)}
+        >
+          <FormattedMessage id="pages.roles.view" defaultMessage="View" />
+        </Button>
+      ) : !isOwner ? (
+        <Button
+          key="view"
+          type="link"
+          size="small"
+          icon={<EyeOutlined />}
+          onClick={() => void openView(record)}
+        >
+          <FormattedMessage id="pages.roles.view" defaultMessage="View" />
+        </Button>
+      ) : null}
+      {!isBuiltInRoleRow(record) && (
+        <Tooltip
+          title={
+            !isOwner
+              ? intl.formatMessage({
+                  id: 'pages.roles.ownerOnly',
+                  defaultMessage: 'Super administrator only',
+                })
+              : undefined
+          }
+        >
+          <span>
+            <Button
+              key="edit"
+              type="link"
+              size="small"
+              icon={<EditOutlined />}
+              onClick={() => void openEdit(record)}
+              disabled={!isOwner}
+            >
+              <FormattedMessage id="pages.common.edit" defaultMessage="Edit" />
+            </Button>
+          </span>
+        </Tooltip>
+      )}
+      {!isBuiltInRoleRow(record) && (
+        <Tooltip
+          title={
+            !isOwner
+              ? intl.formatMessage({
+                  id: 'pages.roles.ownerOnly',
+                  defaultMessage: 'Super administrator only',
+                })
+              : undefined
+          }
+        >
+          <Popconfirm
+            title={intl.formatMessage({
+              id: 'pages.roles.deleteConfirm',
+              defaultMessage: 'Are you sure to delete this role?',
+            })}
+            onConfirm={() => void handleDelete(record.guid)}
+            disabled={!isOwner}
+            okText={intl.formatMessage({
+              id: 'pages.common.confirm',
+              defaultMessage: 'Yes',
+            })}
+            cancelText={intl.formatMessage({
+              id: 'pages.common.cancel',
+              defaultMessage: 'No',
+            })}
+          >
+            <Button
+              key="delete"
+              type="link"
+              size="small"
+              danger
+              icon={<DeleteOutlined />}
+              disabled={!isOwner}
+            >
+              <FormattedMessage
+                id="pages.common.delete"
+                defaultMessage="Delete"
+              />
+            </Button>
+          </Popconfirm>
+        </Tooltip>
+      )}
+    </Space>
+  );
+
+  const actionColumn: ProColumns<RoleListRow> = {
+    title: (
+      <FormattedMessage id="pages.common.action" defaultMessage="Action" />
+    ),
+    valueType: 'option',
+    width: 190,
+    fixed: 'right',
+    render: (_, record) => renderRoleActions(record),
+  };
+
+  // 窄屏改成卡片：角色名 + 内置标记 + 描述/权限数量，操作按钮放卡片底部
+  const mobileColumns: ProColumns<RoleListRow>[] = [
     {
       title: (
-        <FormattedMessage id="pages.common.action" defaultMessage="Action" />
+        <FormattedMessage id="pages.roles.list" defaultMessage="Role List" />
       ),
-      valueType: 'option',
-      width: 190,
-      fixed: 'right',
-      render: (_, record) => (
-        <Space size={0} separator={<Divider orientation="vertical" />}>
-          {isBuiltInRoleRow(record) ? (
-            <Button
-              key="view-built-in"
-              type="link"
-              size="small"
-              icon={<EyeOutlined />}
-              onClick={() => void openSystemIdentity(record)}
-            >
-              <FormattedMessage id="pages.roles.view" defaultMessage="View" />
-            </Button>
-          ) : !isOwner ? (
-            <Button
-              key="view"
-              type="link"
-              size="small"
-              icon={<EyeOutlined />}
-              onClick={() => void openView(record)}
-            >
-              <FormattedMessage id="pages.roles.view" defaultMessage="View" />
-            </Button>
-          ) : null}
-          {!isBuiltInRoleRow(record) && (
-            <Tooltip
-              title={
-                !isOwner
-                  ? intl.formatMessage({
-                      id: 'pages.roles.ownerOnly',
-                      defaultMessage: 'Super administrator only',
-                    })
-                  : undefined
-              }
-            >
-              <span>
-                <Button
-                  key="edit"
-                  type="link"
-                  size="small"
-                  icon={<EditOutlined />}
-                  onClick={() => void openEdit(record)}
-                  disabled={!isOwner}
-                >
-                  <FormattedMessage
-                    id="pages.common.edit"
-                    defaultMessage="Edit"
-                  />
-                </Button>
-              </span>
-            </Tooltip>
-          )}
-          {!isBuiltInRoleRow(record) && (
-            <Tooltip
-              title={
-                !isOwner
-                  ? intl.formatMessage({
-                      id: 'pages.roles.ownerOnly',
-                      defaultMessage: 'Super administrator only',
-                    })
-                  : undefined
-              }
-            >
-              <Popconfirm
-                title={intl.formatMessage({
-                  id: 'pages.roles.deleteConfirm',
-                  defaultMessage: 'Are you sure to delete this role?',
-                })}
-                onConfirm={() => void handleDelete(record.guid)}
-                disabled={!isOwner}
-                okText={intl.formatMessage({
-                  id: 'pages.common.confirm',
-                  defaultMessage: 'Yes',
-                })}
-                cancelText={intl.formatMessage({
-                  id: 'pages.common.cancel',
-                  defaultMessage: 'No',
-                })}
-              >
-                <Button
-                  key="delete"
-                  type="link"
-                  size="small"
-                  danger
-                  icon={<DeleteOutlined />}
-                  disabled={!isOwner}
-                >
-                  <FormattedMessage
-                    id="pages.common.delete"
-                    defaultMessage="Delete"
-                  />
-                </Button>
-              </Popconfirm>
-            </Tooltip>
-          )}
-        </Space>
+      key: 'mobileCard',
+      search: false,
+      render: (_: unknown, record: RoleListRow) => (
+        <MobileListCard
+          title={record.name}
+          badge={
+            isBuiltInRoleRow(record) ? (
+              <Tag>
+                <FormattedMessage
+                  id="pages.roles.systemIdentity.builtIn"
+                  defaultMessage="Built-in"
+                />
+              </Tag>
+            ) : undefined
+          }
+          rows={[
+            {
+              label: (
+                <FormattedMessage id="pages.roles.note" defaultMessage="Note" />
+              ),
+              value: record.note || '-',
+            },
+            {
+              label: (
+                <FormattedMessage
+                  id="pages.roles.permissions"
+                  defaultMessage="Permissions"
+                />
+              ),
+              value: (
+                <Tag color="blue">
+                  {record.permission_count ?? record.permissions.length}
+                </Tag>
+              ),
+            },
+          ]}
+          actions={renderRoleActions(record)}
+        />
       ),
     },
   ];
+
+  const desktopColumns = [...columns, actionColumn];
+  const tableColumns = isMobile
+    ? [
+        // 保留原列定义给查询表单使用，表格里只渲染卡片列
+        ...desktopColumns.map(
+          (col): ProColumns<RoleListRow> => ({ ...col, hideInTable: true }),
+        ),
+        ...mobileColumns,
+      ]
+    : [
+        ...desktopColumns,
+        ...mobileColumns.map(
+          (col): ProColumns<RoleListRow> => ({ ...col, hideInTable: true }),
+        ),
+      ];
 
   return (
     <PageContainer>
@@ -531,6 +600,8 @@ const RoleList: React.FC = () => {
         })}
       />
       <ProTable<RoleListRow>
+        className={isMobile ? 'mobile-card-table' : undefined}
+        showHeader={!isMobile}
         headerTitle={
           <FormattedMessage id="pages.roles.list" defaultMessage="Role List" />
         }
@@ -615,13 +686,22 @@ const RoleList: React.FC = () => {
             success: true,
           };
         }}
-        columns={columns}
-        pagination={{
-          defaultPageSize: 20,
-          showSizeChanger: true,
-          showQuickJumper: true,
-        }}
-        scroll={{ x: 900 }}
+        columns={tableColumns}
+        pagination={
+          isMobile
+            ? {
+                defaultPageSize: 20,
+                simple: true,
+                showSizeChanger: false,
+                showQuickJumper: false,
+              }
+            : {
+                defaultPageSize: 20,
+                showSizeChanger: true,
+                showQuickJumper: true,
+              }
+        }
+        scroll={isMobile ? undefined : { x: 900 }}
         toolBarRender={() => [
           <Tooltip
             key="create-tip"

@@ -3,6 +3,7 @@ import {
   Breadcrumb,
   Button,
   Drawer,
+  Grid,
   Tooltip,
   Typography,
   App,
@@ -22,6 +23,7 @@ import {
 } from '@ant-design/icons';
 import { useIntl, FormattedMessage } from '@umijs/max';
 import dayjs from 'dayjs';
+import MobileListCard from '@/components/MobileListCard';
 
 function formatBytes(bytes: number, decimals = 2) {
   if (!+bytes) return '0 Bytes';
@@ -71,6 +73,8 @@ const FileAudit: React.FC = () => {
   const [pageParams, setPageParams] = useState<Partial<API.PageParams>>();
   const intl = useIntl();
   const { message: msgApi, modal } = App.useApp();
+  const screens = Grid.useBreakpoint();
+  const isMobile = screens.md === false;
 
   const onShowDrawer = (i: IInfo) => {
     setInfo(i);
@@ -249,6 +253,17 @@ const FileAudit: React.FC = () => {
     return '';
   };
 
+  const renderFileField = (record: API.FileAuditItem) => {
+    if (record.path) {
+      return <EllipsisMiddle suffixCount={16}>{record.path}</EllipsisMiddle>;
+    }
+    if (record.files && record.files.length > 0) {
+      const filePath = record.files[0][0];
+      return <EllipsisMiddle suffixCount={16}>{filePath}</EllipsisMiddle>;
+    }
+    return '-';
+  };
+
   const columns: ProColumns<API.FileAuditItem>[] = [
     {
       title: (
@@ -347,18 +362,7 @@ const FileAudit: React.FC = () => {
         id: 'pages.audits.pathTip',
         defaultMessage: 'Path of Remote Device',
       }),
-      render: (_, record) => {
-        if (record.path) {
-          return (
-            <EllipsisMiddle suffixCount={16}>{record.path}</EllipsisMiddle>
-          );
-        }
-        if (record.files && record.files.length > 0) {
-          const filePath = record.files[0][0];
-          return <EllipsisMiddle suffixCount={16}>{filePath}</EllipsisMiddle>;
-        }
-        return '-';
-      },
+      render: (_, record) => renderFileField(record),
     },
     {
       title: (
@@ -370,6 +374,74 @@ const FileAudit: React.FC = () => {
       render: (_, record) => renderDetailColumn(record),
     },
   ];
+
+  // 窄屏改为卡片：设备 ID 作标题、时间放副标题，路径/方向/来源等放在行内。
+  const mobileColumns: ProColumns<API.FileAuditItem>[] = [
+    {
+      title: 'File',
+      key: 'mobileCard',
+      search: false,
+      render: (_, record) => (
+        <MobileListCard
+          title={record.deviceId || '-'}
+          subtitle={
+            record.createdAt
+              ? dayjs(record.createdAt).format('YYYY-MM-DD HH:mm')
+              : '-'
+          }
+          rows={[
+            {
+              label: (
+                <FormattedMessage
+                  id="pages.audits.direction"
+                  defaultMessage="Direction"
+                />
+              ),
+              value: directionEnumMap(record.type || 0),
+            },
+            {
+              label: (
+                <FormattedMessage
+                  id="pages.audits.local"
+                  defaultMessage="Local"
+                />
+              ),
+              value: renderNameIp(record.clientName, record.clientIp),
+            },
+            {
+              label: (
+                <FormattedMessage id="pages.audits.file" defaultMessage="File" />
+              ),
+              value: renderFileField(record),
+            },
+            {
+              label: (
+                <FormattedMessage
+                  id="pages.audits.detail"
+                  defaultMessage="Detail"
+                />
+              ),
+              value: renderDetailColumn(record),
+            },
+          ]}
+        />
+      ),
+    },
+  ];
+
+  const tableColumns = isMobile
+    ? [
+        ...columns.map(
+          (col): ProColumns<API.FileAuditItem> => ({ ...col, hideInTable: true }),
+        ),
+        ...mobileColumns,
+      ]
+    : [
+        ...columns,
+        ...mobileColumns.map(
+          (col): ProColumns<API.FileAuditItem> => ({ ...col, hideInTable: true }),
+        ),
+      ];
 
   return (
     <PageContainer
@@ -397,6 +469,8 @@ const FileAudit: React.FC = () => {
       )}
     >
       <ProTable<API.FileAuditItem, FileAuditSearchParams>
+        className={isMobile ? 'mobile-card-table' : undefined}
+        showHeader={!isMobile}
         headerTitle={
           <FormattedMessage
             id="pages.audits.file"
@@ -435,7 +509,7 @@ const FileAudit: React.FC = () => {
           const result = await getFileAudits(requestParams);
           return toTableResult(result);
         }}
-        columns={columns}
+        columns={tableColumns}
         beforeSearchSubmit={(params) => {
           setPageParams(params);
           return params;
@@ -456,8 +530,16 @@ const FileAudit: React.FC = () => {
             </Button>
           </Tooltip>,
         ]}
-        pagination={DEFAULT_PAGINATION}
-        scroll={{ x: 'max-content' }}
+        pagination={
+          isMobile
+            ? {
+                ...DEFAULT_PAGINATION,
+                showSizeChanger: false,
+                showQuickJumper: false,
+              }
+            : DEFAULT_PAGINATION
+        }
+        scroll={isMobile ? undefined : { x: 'max-content' }}
       />
       <Drawer
         title={

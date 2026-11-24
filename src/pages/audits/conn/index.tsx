@@ -11,6 +11,7 @@ import {
   Breadcrumb,
   Button,
   Drawer,
+  Grid,
   Modal,
   Tooltip,
   Typography,
@@ -23,12 +24,15 @@ import {
   getConnectionAudits,
   updateConnectionAudit,
 } from '@/services/rustdesk-console/audit';
-import { DownloadOutlined } from '@ant-design/icons';
+import { DownloadOutlined, EditTwoTone } from '@ant-design/icons';
 import type { ConnectionAuditSearchParams } from './types';
 import { useConnColumns } from './components/ConnColumns';
 import { useDetailFields } from './components/DetailFields';
 import { useCsvExport } from './components/useCsvExport';
 import { DEFAULT_PAGINATION, toTableResult } from '@/utils/pagination';
+import MobileListCard from '@/components/MobileListCard';
+import { formatDateTime, renderDuration, renderLocalField } from './utils';
+import { getConnTypeMsgId, renderConnTypeIcon } from './connType';
 import {
   canDisconnectActiveConnection,
   canDisconnectAuditRecord,
@@ -42,6 +46,8 @@ const ConnectionAudit: React.FC = () => {
   const intl = useIntl();
   const { message: msgApi } = App.useApp();
   const access = useAccess();
+  const screens = Grid.useBreakpoint();
+  const isMobile = screens.md === false;
   const canEdit = access.isSuperAdmin;
   const canDisconnect = access.canDevicesDisconnect;
   const pageMode = getConnectionPageMode(access.canAuditView);
@@ -203,6 +209,207 @@ const ConnectionAudit: React.FC = () => {
     },
   ];
 
+  // 窄屏：活动连接改为卡片，设备 ID 作标题，连接 ID 与断开按钮收进行内/底部。
+  const restrictedMobileColumns: ProColumns<API.ActiveConnectionItem>[] = [
+    {
+      title: 'Connection',
+      key: 'mobileCard',
+      search: false,
+      render: (_, record) => (
+        <MobileListCard
+          title={record.deviceId || '-'}
+          rows={[
+            {
+              label: (
+                <FormattedMessage
+                  id="pages.audits.connectionId"
+                  defaultMessage="Connection ID"
+                />
+              ),
+              value: record.connId,
+            },
+          ]}
+          actions={
+            canDisconnectActiveConnection(canDisconnect, record) ? (
+              <Button
+                size="small"
+                danger
+                onClick={() => {
+                  setDisconnectTarget({
+                    uuid: record.deviceUuid,
+                    connId: record.connId,
+                  });
+                  setDisconnectModalOpen(true);
+                }}
+              >
+                <FormattedMessage
+                  id="pages.audits.disconnect"
+                  defaultMessage="Disconnect"
+                />
+              </Button>
+            ) : undefined
+          }
+        />
+      ),
+    },
+  ];
+
+  const restrictedTableColumns = isMobile
+    ? [
+        ...restrictedColumns.map(
+          (col): ProColumns<API.ActiveConnectionItem> => ({
+            ...col,
+            hideInTable: true,
+          }),
+        ),
+        ...restrictedMobileColumns,
+      ]
+    : [
+        ...restrictedColumns,
+        ...restrictedMobileColumns.map(
+          (col): ProColumns<API.ActiveConnectionItem> => ({
+            ...col,
+            hideInTable: true,
+          }),
+        ),
+      ];
+
+  // 连接审计卡片：设备 ID/时间/连接类型/来源/时长 + 详情、备注、断开。
+  const connMobileColumns: ProColumns<API.ConnectionAuditItem>[] = [
+    {
+      title: 'Connection',
+      key: 'mobileCard',
+      search: false,
+      render: (_, record) => (
+        <MobileListCard
+          title={record.deviceId || '-'}
+          subtitle={formatDateTime(record.createdAt)}
+          rows={[
+            {
+              label: (
+                <FormattedMessage id="pages.audits.type" defaultMessage="Type" />
+              ),
+              value: (
+                <span
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 4,
+                  }}
+                >
+                  {renderConnTypeIcon(record.type)}
+                  <span>
+                    {intl.formatMessage({ id: getConnTypeMsgId(record.type) })}
+                  </span>
+                </span>
+              ),
+            },
+            {
+              label: (
+                <FormattedMessage
+                  id="pages.audits.local"
+                  defaultMessage="Local"
+                />
+              ),
+              value: renderLocalField(record),
+            },
+            record.requestedAt
+              ? {
+                  label: (
+                    <FormattedMessage
+                      id="pages.audits.requestedAt"
+                      defaultMessage="Requested At"
+                    />
+                  ),
+                  value: formatDateTime(record.requestedAt),
+                }
+              : null,
+            record.establishedAt || record.closedAt
+              ? {
+                  label: (
+                    <FormattedMessage
+                      id="pages.audits.duration"
+                      defaultMessage="Duration"
+                    />
+                  ),
+                  value: renderDuration(record),
+                }
+              : null,
+          ]}
+          note={record.note || undefined}
+          actions={
+            <>
+              <Button
+                size="small"
+                onClick={() => {
+                  setCurrentRow(record);
+                  setDrawerOpen(true);
+                }}
+              >
+                <FormattedMessage
+                  id="pages.audits.detail"
+                  defaultMessage="Detail"
+                />
+              </Button>
+              {canEdit && (
+                <Button
+                  size="small"
+                  icon={<EditTwoTone />}
+                  aria-label={intl.formatMessage({
+                    id: 'pages.common.edit',
+                    defaultMessage: 'Edit',
+                  })}
+                  onClick={() => {
+                    setCurrentRow(record);
+                    setEditModalVisible(true);
+                  }}
+                />
+              )}
+              {canDisconnectAuditRecord(canDisconnect, record) && (
+                <Button
+                  size="small"
+                  danger
+                  onClick={() => {
+                    setDisconnectTarget({
+                      uuid: record.deviceUuid,
+                      connId: Number(record.connId),
+                    });
+                    setDisconnectModalOpen(true);
+                  }}
+                >
+                  <FormattedMessage
+                    id="pages.audits.disconnect"
+                    defaultMessage="Disconnect"
+                  />
+                </Button>
+              )}
+            </>
+          }
+        />
+      ),
+    },
+  ];
+
+  const connTableColumns = isMobile
+    ? [
+        ...columns.map(
+          (col): ProColumns<API.ConnectionAuditItem> => ({
+            ...col,
+            hideInTable: true,
+          }),
+        ),
+        ...connMobileColumns,
+      ]
+    : [
+        ...columns,
+        ...connMobileColumns.map(
+          (col): ProColumns<API.ConnectionAuditItem> => ({
+            ...col,
+            hideInTable: true,
+          }),
+        ),
+      ];
+
   return (
     <PageContainer
       breadcrumbRender={() => (
@@ -230,6 +437,8 @@ const ConnectionAudit: React.FC = () => {
     >
       {pageMode === 'restricted' ? (
         <ProTable<API.ActiveConnectionItem>
+          className={isMobile ? 'mobile-card-table' : undefined}
+          showHeader={!isMobile}
           headerTitle={
             <FormattedMessage
               id="pages.audits.currentConnections"
@@ -246,8 +455,16 @@ const ConnectionAudit: React.FC = () => {
             });
             return toTableResult(result);
           }}
-          columns={restrictedColumns}
-          pagination={DEFAULT_PAGINATION}
+          columns={restrictedTableColumns}
+          pagination={
+            isMobile
+              ? {
+                  ...DEFAULT_PAGINATION,
+                  showSizeChanger: false,
+                  showQuickJumper: false,
+                }
+              : DEFAULT_PAGINATION
+          }
           options={{
             density: true,
             fullScreen: false,
@@ -257,6 +474,8 @@ const ConnectionAudit: React.FC = () => {
         />
       ) : (
         <ProTable<API.ConnectionAuditItem, ConnectionAuditSearchParams>
+          className={isMobile ? 'mobile-card-table' : undefined}
+          showHeader={!isMobile}
           headerTitle={
             <FormattedMessage
               id="pages.audits.conn"
@@ -293,7 +512,7 @@ const ConnectionAudit: React.FC = () => {
             const result = await getConnectionAudits(requestParams);
             return toTableResult(result);
           }}
-          columns={columns}
+          columns={connTableColumns}
           beforeSearchSubmit={(params) => {
             setPageParams(params);
             return params;
@@ -318,8 +537,16 @@ const ConnectionAudit: React.FC = () => {
               </Button>
             </Tooltip>,
           ]}
-          pagination={DEFAULT_PAGINATION}
-          scroll={{ x: 'max-content' }}
+          pagination={
+            isMobile
+              ? {
+                  ...DEFAULT_PAGINATION,
+                  showSizeChanger: false,
+                  showQuickJumper: false,
+                }
+              : DEFAULT_PAGINATION
+          }
+          scroll={isMobile ? undefined : { x: 'max-content' }}
           options={{
             density: true,
             setting: { listsHeight: 400 },

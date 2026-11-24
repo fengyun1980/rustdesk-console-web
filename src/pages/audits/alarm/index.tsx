@@ -1,7 +1,7 @@
 import type { ActionType, ProColumns } from '@ant-design/pro-components';
 import { PageContainer, ProTable } from '@ant-design/pro-components';
 import { FormattedMessage, useIntl } from '@umijs/max';
-import { App, Breadcrumb, Button, Modal, Tag, Tooltip } from 'antd';
+import { App, Breadcrumb, Button, Grid, Modal, Tag, Tooltip } from 'antd';
 import { DownloadOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import React, { useRef, useState } from 'react';
@@ -9,6 +9,7 @@ import { getAlarmAudits } from '@/services/rustdesk-console/audit';
 import { renderNameIp } from '@/utils/audit';
 import { buildCsv, downloadCsv } from '@/utils/csv';
 import { DEFAULT_PAGINATION, toTableResult } from '@/utils/pagination';
+import MobileListCard from '@/components/MobileListCard';
 
 const ALARM_TYPE_MAP: Record<number, { msgId: string; color: string }> = {
   0: { msgId: 'pages.audits.alarmType.ipWhitelist', color: 'red' },
@@ -53,6 +54,8 @@ const AlarmAudit: React.FC = () => {
   const actionRef = useRef<ActionType>(null);
   const intl = useIntl();
   const { message: msgApi, modal } = App.useApp();
+  const screens = Grid.useBreakpoint();
+  const isMobile = screens.md === false;
   const [pageParams, setPageParams] =
     useState<Partial<AlarmAuditSearchParams>>();
 
@@ -177,6 +180,16 @@ const AlarmAudit: React.FC = () => {
     });
   };
 
+  const renderAlarmType = (record: API.AlarmAuditItem) => {
+    const config = ALARM_TYPE_MAP[record.typ ?? -1];
+    if (!config) return <Tag>{record.typ}</Tag>;
+    return (
+      <Tag color={config.color}>
+        {intl.formatMessage({ id: config.msgId })}
+      </Tag>
+    );
+  };
+
   const columns: ProColumns<API.AlarmAuditItem>[] = [
     {
       title: <FormattedMessage id="pages.audits.type" defaultMessage="Type" />,
@@ -184,15 +197,7 @@ const AlarmAudit: React.FC = () => {
       valueType: 'select',
       width: 200,
       valueEnum: alarmTypeValueEnum,
-      render: (_, record) => {
-        const config = ALARM_TYPE_MAP[record.typ ?? -1];
-        if (!config) return <Tag>{record.typ}</Tag>;
-        return (
-          <Tag color={config.color}>
-            {intl.formatMessage({ id: config.msgId })}
-          </Tag>
-        );
-      },
+      render: (_, record) => renderAlarmType(record),
     },
     {
       title: (
@@ -258,6 +263,59 @@ const AlarmAudit: React.FC = () => {
     },
   ];
 
+  // 窄屏改为卡片：告警信息密度高，只保留类型/来源/时间等关键字段。
+  const mobileColumns: ProColumns<API.AlarmAuditItem>[] = [
+    {
+      title: 'Alarm',
+      key: 'mobileCard',
+      search: false,
+      render: (_, record) => (
+        <MobileListCard
+          title={record.deviceId || '-'}
+          subtitle={
+            record.createdAt
+              ? dayjs(record.createdAt).format('YYYY-MM-DD HH:mm')
+              : '-'
+          }
+          rows={[
+            {
+              label: (
+                <FormattedMessage
+                  id="pages.audits.type"
+                  defaultMessage="Type"
+                />
+              ),
+              value: renderAlarmType(record),
+            },
+            {
+              label: (
+                <FormattedMessage
+                  id="pages.audits.local"
+                  defaultMessage="Local"
+                />
+              ),
+              value: renderNameIp(record.infoName, record.infoIp),
+            },
+          ]}
+        />
+      ),
+    },
+  ];
+
+  const tableColumns = isMobile
+    ? [
+        ...columns.map(
+          (col): ProColumns<API.AlarmAuditItem> => ({ ...col, hideInTable: true }),
+        ),
+        ...mobileColumns,
+      ]
+    : [
+        ...columns,
+        ...mobileColumns.map(
+          (col): ProColumns<API.AlarmAuditItem> => ({ ...col, hideInTable: true }),
+        ),
+      ];
+
   return (
     <PageContainer
       breadcrumbRender={() => (
@@ -284,6 +342,8 @@ const AlarmAudit: React.FC = () => {
       )}
     >
       <ProTable<API.AlarmAuditItem, AlarmAuditSearchParams>
+        className={isMobile ? 'mobile-card-table' : undefined}
+        showHeader={!isMobile}
         headerTitle={
           <FormattedMessage
             id="pages.audits.alarm"
@@ -318,7 +378,7 @@ const AlarmAudit: React.FC = () => {
           const result = await getAlarmAudits(requestParams);
           return toTableResult(result);
         }}
-        columns={columns}
+        columns={tableColumns}
         beforeSearchSubmit={(params) => {
           setPageParams(params as Partial<AlarmAuditSearchParams>);
           return params;
@@ -343,8 +403,16 @@ const AlarmAudit: React.FC = () => {
             </Button>
           </Tooltip>,
         ]}
-        pagination={DEFAULT_PAGINATION}
-        scroll={{ x: 1000 }}
+        pagination={
+          isMobile
+            ? {
+                ...DEFAULT_PAGINATION,
+                showSizeChanger: false,
+                showQuickJumper: false,
+              }
+            : DEFAULT_PAGINATION
+        }
+        scroll={isMobile ? undefined : { x: 1000 }}
         options={{
           density: true,
           setting: {

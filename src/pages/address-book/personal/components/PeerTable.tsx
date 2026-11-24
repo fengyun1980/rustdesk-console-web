@@ -1,10 +1,12 @@
 import type { ActionType, ProColumns } from '@ant-design/pro-components';
 import { ProTable } from '@ant-design/pro-components';
 import { FormattedMessage } from '@umijs/max';
-import { Button } from 'antd';
+import { Button, Grid } from 'antd';
 import { PlusOutlined, SelectOutlined } from '@ant-design/icons';
 import React from 'react';
 import { getPeers } from '@/services/rustdesk-console/addressBook';
+import MobileListCard from '@/components/MobileListCard';
+import WebClientDeviceLink from '@/components/WebClientDeviceLink';
 import { DEFAULT_PAGINATION, toTableResult } from '@/utils/pagination';
 
 interface PeerTableProps {
@@ -32,9 +34,105 @@ const PeerTable: React.FC<PeerTableProps> = ({
   onOpenImport,
   onOpenAddPeer,
 }) => {
+  const screens = Grid.useBreakpoint();
+  const isMobile = screens.md === false;
+
+  const visibleColumns = canWrite
+    ? columns
+    : columns.filter((column) => column.valueType !== 'option');
+  const optionColumn = visibleColumns.find(
+    (column) => column.valueType === 'option',
+  );
+  const tagsColumn = visibleColumns.find((column) => column.dataIndex === 'tags');
+
+  // 窄屏改成卡片：ID/设备/标签/备注纵向排列，编辑删除放在卡片底部
+  const mobileColumns: ProColumns<API.PeerItem>[] = isMobile
+    ? [
+        {
+          title: 'Peer',
+          key: 'mobileCard',
+          search: false,
+          render: (_: unknown, record: API.PeerItem) => {
+            const peer = record as API.PeerItem & {
+              username?: string;
+              alias?: string;
+            };
+            const device =
+              peer.username && record.hostname
+                ? `${peer.username}@${record.hostname}`
+                : record.hostname || peer.username || '-';
+            const tagCell = tagsColumn?.render
+              ? (tagsColumn.render(
+                  record.id,
+                  record,
+                  0,
+                  {} as never,
+                  {} as never,
+                ) as React.ReactNode)
+              : undefined;
+            const actions = optionColumn?.render
+              ? (optionColumn.render(
+                  record.id,
+                  record,
+                  0,
+                  {} as never,
+                  {} as never,
+                ) as React.ReactNode)
+              : undefined;
+
+            return (
+              <MobileListCard
+                title={peer.alias || record.id}
+                subtitle={
+                  <>
+                    {record.id}
+                    <WebClientDeviceLink id={record.id} autoConnect />
+                  </>
+                }
+                rows={[
+                  {
+                    label: (
+                      <FormattedMessage
+                        id="pages.addressBook.device"
+                        defaultMessage="Device"
+                      />
+                    ),
+                    value: device,
+                  },
+                  tagCell !== undefined
+                    ? {
+                        label: (
+                          <FormattedMessage
+                            id="pages.addressBook.tags"
+                            defaultMessage="Tags"
+                          />
+                        ),
+                        value: tagCell,
+                      }
+                    : null,
+                  {
+                    label: (
+                      <FormattedMessage
+                        id="pages.addressBook.note"
+                        defaultMessage="Note"
+                      />
+                    ),
+                    value: record.note || '-',
+                  },
+                ]}
+                actions={actions}
+              />
+            );
+          },
+        },
+      ]
+    : [];
+
   return (
     <ProTable<API.PeerItem>
       key={abGuid || 'loading'}
+      className={isMobile ? 'mobile-card-table' : undefined}
+      showHeader={!isMobile}
       headerTitle={headerTitle}
       columnsState={{
         persistenceType: 'localStorage',
@@ -58,12 +156,20 @@ const PeerTable: React.FC<PeerTableProps> = ({
         return toTableResult(result);
       }}
       columns={
-        canWrite
-          ? columns
-          : columns.filter((column) => column.valueType !== 'option')
+        isMobile
+          ? [
+              ...visibleColumns.map(
+                (column): ProColumns<API.PeerItem> => ({
+                  ...column,
+                  hideInTable: true,
+                }),
+              ),
+              ...mobileColumns,
+            ]
+          : [...visibleColumns, ...mobileColumns]
       }
       pagination={DEFAULT_PAGINATION}
-      scroll={{ x: 1100 }}
+      scroll={isMobile ? undefined : { x: 1100 }}
       toolBarRender={() =>
         canWrite
           ? [

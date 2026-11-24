@@ -1,7 +1,8 @@
 import type { ActionType, ProColumns } from '@ant-design/pro-components';
 import { PageContainer, ProTable } from '@ant-design/pro-components';
 import { FormattedMessage, useAccess, useIntl } from '@umijs/max';
-import { Button, Drawer, message, Typography } from 'antd';
+import { Button, Drawer, Grid, message, Typography } from 'antd';
+import dayjs from 'dayjs';
 import React, { useRef, useState } from 'react';
 import { getConsoleAudits } from '@/services/rustdesk-console/audit';
 import {
@@ -9,6 +10,7 @@ import {
   webClientHttpStatus,
 } from '@/services/rustdesk-console/webClient';
 import { DEFAULT_PAGINATION, toTableResult } from '@/utils/pagination';
+import MobileListCard from '@/components/MobileListCard';
 import { webClientAuditContext, webClientAuditLabel } from './web-client-audit';
 
 const ConsoleAudit: React.FC = () => {
@@ -16,6 +18,8 @@ const ConsoleAudit: React.FC = () => {
   const actionRef = useRef<ActionType>(null);
   const [selected, setSelected] = useState<API.ConsoleAuditItem>();
   const access = useAccess();
+  const screens = Grid.useBreakpoint();
+  const isMobile = screens.md === false;
   const [ending, setEnding] = useState(false);
   const finishSession = async (record: API.ConsoleAuditItem) => {
     if (ending || !record.target_guid) return;
@@ -49,6 +53,50 @@ const ConsoleAudit: React.FC = () => {
     ? webClientAuditContext(selected)
     : undefined;
 
+  const renderUser = (record: API.ConsoleAuditItem) =>
+    record.actor_user_name ||
+    record.actor_user_guid ||
+    intl.formatMessage({
+      id: 'pages.audits.unknownUser',
+      defaultMessage: 'Unknown user',
+    });
+
+  const renderTargetType = (record: API.ConsoleAuditItem) =>
+    record.target_type === 'web_client_session'
+      ? intl.formatMessage({
+          id: 'pages.audits.webClient.session',
+          defaultMessage: 'Web Client session',
+        })
+      : record.target_type || '-';
+
+  const renderResult = (
+    record: API.ConsoleAuditItem,
+    dom?: React.ReactNode,
+  ) => {
+    if (
+      ['web_client.remote_auth_failed', 'web_client.file_failed'].includes(
+        record.action || '',
+      )
+    ) {
+      return intl.formatMessage({
+        id: 'pages.audits.webClient.reportedFailure',
+        defaultMessage: 'Failure reported',
+      });
+    }
+    if (dom !== undefined) return dom;
+    if (record.result === 'allowed')
+      return intl.formatMessage({
+        id: 'pages.audits.result.allowed',
+        defaultMessage: 'Allowed',
+      });
+    if (record.result === 'denied')
+      return intl.formatMessage({
+        id: 'pages.audits.result.denied',
+        defaultMessage: 'Denied',
+      });
+    return '-';
+  };
+
   const columns: ProColumns<API.ConsoleAuditItem>[] = [
     {
       title: (
@@ -71,13 +119,7 @@ const ConsoleAudit: React.FC = () => {
       dataIndex: 'actor_user_name',
       width: 150,
       search: false,
-      render: (_, record) =>
-        record.actor_user_name ||
-        record.actor_user_guid ||
-        intl.formatMessage({
-          id: 'pages.audits.unknownUser',
-          defaultMessage: 'Unknown user',
-        }),
+      render: (_, record) => renderUser(record),
     },
     {
       title: (
@@ -103,13 +145,7 @@ const ConsoleAudit: React.FC = () => {
       ),
       dataIndex: 'target_type',
       width: 150,
-      render: (_, record) =>
-        record.target_type === 'web_client_session'
-          ? intl.formatMessage({
-              id: 'pages.audits.webClient.session',
-              defaultMessage: 'Web Client session',
-            })
-          : record.target_type || '-',
+      render: (_, record) => renderTargetType(record),
       fieldProps: {
         placeholder: intl.formatMessage({
           id: 'pages.audits.searchTargetTypePlaceholder',
@@ -135,15 +171,7 @@ const ConsoleAudit: React.FC = () => {
       ),
       dataIndex: 'result',
       width: 120,
-      render: (_, record) =>
-        ['web_client.remote_auth_failed', 'web_client.file_failed'].includes(
-          record.action || '',
-        )
-          ? intl.formatMessage({
-              id: 'pages.audits.webClient.reportedFailure',
-              defaultMessage: 'Failure reported',
-            })
-          : _,
+      render: (dom, record) => renderResult(record, dom),
       valueEnum: {
         allowed: {
           text: intl.formatMessage({
@@ -196,9 +224,97 @@ const ConsoleAudit: React.FC = () => {
     },
   ];
 
+  // 窄屏改为卡片：操作人作标题、时间放副标题，动作/目标/结果放在行内。
+  const mobileColumns: ProColumns<API.ConsoleAuditItem>[] = [
+    {
+      title: 'Console',
+      key: 'mobileCard',
+      search: false,
+      render: (_, record) => (
+        <MobileListCard
+          title={renderUser(record)}
+          subtitle={
+            record.created_at
+              ? dayjs(record.created_at).format('YYYY-MM-DD HH:mm')
+              : '-'
+          }
+          rows={[
+            {
+              label: (
+                <FormattedMessage
+                  id="pages.audits.action"
+                  defaultMessage="Action"
+                />
+              ),
+              value: webClientAuditLabel(record.action, intl.formatMessage),
+            },
+            {
+              label: (
+                <FormattedMessage
+                  id="pages.audits.targetType"
+                  defaultMessage="Target type"
+                />
+              ),
+              value: renderTargetType(record),
+            },
+            {
+              label: (
+                <FormattedMessage
+                  id="pages.audits.targetId"
+                  defaultMessage="Target ID"
+                />
+              ),
+              value: record.target_guid || '-',
+            },
+            {
+              label: (
+                <FormattedMessage
+                  id="pages.audits.result"
+                  defaultMessage="Result"
+                />
+              ),
+              value: renderResult(record),
+            },
+          ]}
+          note={record.reason || undefined}
+          actions={
+            <Button size="small" onClick={() => setSelected(record)}>
+              <FormattedMessage
+                id="pages.audits.detail"
+                defaultMessage="Detail"
+              />
+            </Button>
+          }
+        />
+      ),
+    },
+  ];
+
+  const tableColumns = isMobile
+    ? [
+        ...columns.map(
+          (col): ProColumns<API.ConsoleAuditItem> => ({
+            ...col,
+            hideInTable: true,
+          }),
+        ),
+        ...mobileColumns,
+      ]
+    : [
+        ...columns,
+        ...mobileColumns.map(
+          (col): ProColumns<API.ConsoleAuditItem> => ({
+            ...col,
+            hideInTable: true,
+          }),
+        ),
+      ];
+
   return (
     <PageContainer>
       <ProTable<API.ConsoleAuditItem>
+        className={isMobile ? 'mobile-card-table' : undefined}
+        showHeader={!isMobile}
         headerTitle={
           <FormattedMessage
             id="pages.audits.console"
@@ -230,8 +346,16 @@ const ConsoleAudit: React.FC = () => {
           });
           return toTableResult(result);
         }}
-        columns={columns}
-        pagination={DEFAULT_PAGINATION}
+        columns={tableColumns}
+        pagination={
+          isMobile
+            ? {
+                ...DEFAULT_PAGINATION,
+                showSizeChanger: false,
+                showQuickJumper: false,
+              }
+            : DEFAULT_PAGINATION
+        }
         options={{
           density: true,
           setting: {
@@ -240,7 +364,7 @@ const ConsoleAudit: React.FC = () => {
           fullScreen: false,
           reload: true,
         }}
-        scroll={{ x: 1200 }}
+        scroll={isMobile ? undefined : { x: 1200 }}
       />
       <Drawer
         title={

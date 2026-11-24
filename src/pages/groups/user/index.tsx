@@ -12,12 +12,14 @@ import {
   Button,
   Divider,
   Form,
+  Grid,
   Input,
   Popconfirm,
   Space,
   Tag,
 } from 'antd';
 import React, { useRef, useState } from 'react';
+import MobileListCard from '@/components/MobileListCard';
 import {
   createUserGroup,
   deleteUserGroup,
@@ -31,6 +33,8 @@ const UserGroupList: React.FC = () => {
   const intl = useIntl();
   const { message: msgApi } = App.useApp();
   const access = useAccess();
+  const screens = Grid.useBreakpoint();
+  const isMobile = screens.md === false;
   const actionRef = useRef<ActionType>(null);
   const [createModalVisible, setCreateModalVisible] = useState(false);
   const [editModalVisible, setEditModalVisible] = useState(false);
@@ -113,7 +117,89 @@ const UserGroupList: React.FC = () => {
     }
   };
 
-  const columns: ProColumns<API.UserGroupItem>[] = [
+  const openGroup = (record: API.UserGroupItem) => {
+    history.push(`/groups/user/${record.guid}`, {
+      name: record.name,
+    });
+  };
+
+  const hasAnyAction =
+    access.canUserGroupsMembership ||
+    access.canUserGroupsEdit ||
+    access.canUserGroupsDelete;
+
+  // 桌面表格与移动端卡片共用同一套操作，权限判断只保留一份。
+  const renderActions = (record: API.UserGroupItem) => (
+    <Space size={0} separator={<Divider orientation="vertical" />}>
+      {access.canUserGroupsMembership && (
+        <Button
+          type="link"
+          size="small"
+          icon={<TeamOutlined />}
+          onClick={() => setMembersGroup(record)}
+        >
+          <FormattedMessage
+            id="pages.userGroups.members"
+            defaultMessage="Members"
+          />
+        </Button>
+      )}
+      {access.canUserGroupsEdit && (
+        <Button
+          type="link"
+          size="small"
+          icon={<EditOutlined />}
+          onClick={() => {
+            setCurrentGroup(record);
+            form.setFieldsValue(record);
+            setEditModalVisible(true);
+          }}
+        >
+          <FormattedMessage id="pages.common.edit" defaultMessage="Edit" />
+        </Button>
+      )}
+      {access.canUserGroupsDelete &&
+        (record.is_default ? (
+          <Button
+            type="link"
+            size="small"
+            danger
+            disabled
+            icon={<DeleteOutlined />}
+          >
+            <FormattedMessage
+              id="pages.common.delete"
+              defaultMessage="Delete"
+            />
+          </Button>
+        ) : (
+          <Popconfirm
+            title={intl.formatMessage({
+              id: 'pages.userGroups.deleteConfirm',
+              defaultMessage: 'Delete this user group?',
+            })}
+            onConfirm={() => handleDelete(record.guid)}
+            okText={intl.formatMessage({
+              id: 'pages.common.confirm',
+              defaultMessage: 'Yes',
+            })}
+            cancelText={intl.formatMessage({
+              id: 'pages.common.cancel',
+              defaultMessage: 'No',
+            })}
+          >
+            <Button type="link" size="small" danger icon={<DeleteOutlined />}>
+              <FormattedMessage
+                id="pages.common.delete"
+                defaultMessage="Delete"
+              />
+            </Button>
+          </Popconfirm>
+        ))}
+    </Space>
+  );
+
+  const desktopColumns: ProColumns<API.UserGroupItem>[] = [
     {
       title: (
         <FormattedMessage
@@ -131,14 +217,7 @@ const UserGroupList: React.FC = () => {
       },
       render: (_, record) => (
         <Space>
-          <a
-            onClick={() => {
-              history.push(`/groups/user/${record.guid}`, {
-                name: record.name,
-              });
-            }}
-            style={{ cursor: 'pointer' }}
-          >
+          <a onClick={() => openGroup(record)} style={{ cursor: 'pointer' }}>
             {record.name}
           </a>
           {record.is_default && (
@@ -180,90 +259,93 @@ const UserGroupList: React.FC = () => {
       valueType: 'option',
       width: 200,
       fixed: 'right',
-      hideInTable:
-        !access.canUserGroupsMembership &&
-        !access.canUserGroupsEdit &&
-        !access.canUserGroupsDelete,
-      render: (_, record) => (
-        <Space size={0} separator={<Divider orientation="vertical" />}>
-          {access.canUserGroupsMembership && (
-            <Button
-              type="link"
-              size="small"
-              icon={<TeamOutlined />}
-              onClick={() => setMembersGroup(record)}
-            >
-              <FormattedMessage
-                id="pages.userGroups.members"
-                defaultMessage="Members"
-              />
-            </Button>
-          )}
-          {access.canUserGroupsEdit && (
-            <Button
-              type="link"
-              size="small"
-              icon={<EditOutlined />}
-              onClick={() => {
-                setCurrentGroup(record);
-                form.setFieldsValue(record);
-                setEditModalVisible(true);
-              }}
-            >
-              <FormattedMessage id="pages.common.edit" defaultMessage="Edit" />
-            </Button>
-          )}
-          {access.canUserGroupsDelete &&
-            (record.is_default ? (
-              <Button
-                type="link"
-                size="small"
-                danger
-                disabled
-                icon={<DeleteOutlined />}
-              >
+      hideInTable: !hasAnyAction,
+      render: (_, record) => renderActions(record),
+    },
+  ];
+
+  // 窄屏改成卡片列表：组名 + 默认标记置顶，备注/成员数纵向排列，操作按钮放在卡片底部。
+  const mobileColumns: ProColumns<API.UserGroupItem>[] = [
+    {
+      title: (
+        <FormattedMessage
+          id="pages.userGroups.name"
+          defaultMessage="Group Name"
+        />
+      ),
+      key: 'mobileCard',
+      search: false,
+      render: (_, record: API.UserGroupItem) => (
+        <MobileListCard
+          title={
+            <a onClick={() => openGroup(record)} style={{ cursor: 'pointer' }}>
+              {record.name}
+            </a>
+          }
+          badge={
+            record.is_default ? (
+              <Tag color="blue">
                 <FormattedMessage
-                  id="pages.common.delete"
-                  defaultMessage="Delete"
+                  id="pages.userGroups.default"
+                  defaultMessage="Default"
                 />
-              </Button>
-            ) : (
-              <Popconfirm
-                title={intl.formatMessage({
-                  id: 'pages.userGroups.deleteConfirm',
-                  defaultMessage: 'Delete this user group?',
-                })}
-                onConfirm={() => handleDelete(record.guid)}
-                okText={intl.formatMessage({
-                  id: 'pages.common.confirm',
-                  defaultMessage: 'Yes',
-                })}
-                cancelText={intl.formatMessage({
-                  id: 'pages.common.cancel',
-                  defaultMessage: 'No',
-                })}
-              >
-                <Button
-                  type="link"
-                  size="small"
-                  danger
-                  icon={<DeleteOutlined />}
-                >
-                  <FormattedMessage
-                    id="pages.common.delete"
-                    defaultMessage="Delete"
-                  />
-                </Button>
-              </Popconfirm>
-            ))}
-        </Space>
+              </Tag>
+            ) : undefined
+          }
+          rows={[
+            record.note
+              ? {
+                  label: (
+                    <FormattedMessage
+                      id="pages.userGroups.note"
+                      defaultMessage="Note"
+                    />
+                  ),
+                  value: record.note,
+                }
+              : null,
+            {
+              label: (
+                <FormattedMessage
+                  id="pages.userGroups.userCount"
+                  defaultMessage="User Count"
+                />
+              ),
+              value: record.user_count ?? 0,
+            },
+          ]}
+          actions={hasAnyAction ? renderActions(record) : undefined}
+        />
       ),
     },
   ];
 
+  const tableColumns = isMobile
+    ? [
+        // 保留原列定义给查询表单使用，表格里只渲染卡片列
+        ...desktopColumns.map(
+          (col): ProColumns<API.UserGroupItem> => ({
+            ...col,
+            hideInTable: true,
+          }),
+        ),
+        ...mobileColumns,
+      ]
+    : [
+        ...desktopColumns,
+        ...mobileColumns.map(
+          (col): ProColumns<API.UserGroupItem> => ({
+            ...col,
+            hideInTable: true,
+          }),
+        ),
+      ];
+
   return (
     <PageContainer>
       <ProTable<API.UserGroupItem>
+        className={isMobile ? 'mobile-card-table' : undefined}
+        showHeader={!isMobile}
         headerTitle={
           <FormattedMessage
             id="pages.userGroups.list"
@@ -284,9 +366,18 @@ const UserGroupList: React.FC = () => {
           });
           return toTableResult(result);
         }}
-        columns={columns}
-        pagination={DEFAULT_PAGINATION}
-        scroll={{ x: 800 }}
+        columns={tableColumns}
+        pagination={
+          isMobile
+            ? {
+                ...DEFAULT_PAGINATION,
+                simple: true,
+                showSizeChanger: false,
+                showQuickJumper: false,
+              }
+            : DEFAULT_PAGINATION
+        }
+        scroll={isMobile ? undefined : { x: 800 }}
         toolBarRender={() =>
           access.canUserGroupsCreate
             ? [

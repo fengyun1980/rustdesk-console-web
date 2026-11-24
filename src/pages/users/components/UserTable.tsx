@@ -10,6 +10,7 @@ import BatchActionsBar from './BatchActionsBar';
 
 interface UserTableProps {
   userGroupGuid?: string;
+  isMobile?: boolean;
   columns: ProColumns<API.UserItem>[];
   actionRef: React.MutableRefObject<ActionType | null>;
   selectedRowKeys: React.Key[];
@@ -39,6 +40,7 @@ interface UserTableProps {
 
 const UserTable: React.FC<UserTableProps> = ({
   userGroupGuid,
+  isMobile = false,
   columns,
   actionRef,
   selectedRowKeys,
@@ -67,6 +69,8 @@ const UserTable: React.FC<UserTableProps> = ({
 }) => {
   return (
     <ProTable<API.UserItem>
+      className={isMobile ? 'mobile-card-table' : undefined}
+      showHeader={!isMobile}
       headerTitle={
         <FormattedMessage id="pages.users.list" defaultMessage="User List" />
       }
@@ -77,18 +81,20 @@ const UserTable: React.FC<UserTableProps> = ({
       actionRef={actionRef}
       rowKey="guid"
       rowSelection={
-        (userGroupGuid && canUserGroupsMembership) ||
-        (!userGroupGuid && (canUsersStatus || canUsersForceLogout))
-          ? {
-              selectedRowKeys,
-              onChange: (keys, rows) => onSelectionChange(keys, rows),
-              getCheckboxProps: (record) => ({
-                disabled:
-                  !isSuperAdmin &&
-                  (record.is_admin || record.is_protected === true),
-              }),
-            }
-          : undefined
+        isMobile
+          ? undefined
+          : (userGroupGuid && canUserGroupsMembership) ||
+              (!userGroupGuid && (canUsersStatus || canUsersForceLogout))
+            ? {
+                selectedRowKeys,
+                onChange: (keys, rows) => onSelectionChange(keys, rows),
+                getCheckboxProps: (record) => ({
+                  disabled:
+                    !isSuperAdmin &&
+                    (record.is_admin || record.is_protected === true),
+                }),
+              }
+            : undefined
       }
       tableAlertOptionRender={() =>
         userGroupGuid ? (
@@ -159,8 +165,17 @@ const UserTable: React.FC<UserTableProps> = ({
           ? columns.filter((col) => col.dataIndex !== 'user_group_name')
           : columns
       }
-      pagination={DEFAULT_PAGINATION}
-      scroll={{ x: 'max-content' }}
+      pagination={
+        isMobile
+          ? {
+              ...DEFAULT_PAGINATION,
+              simple: true,
+              showSizeChanger: false,
+              showQuickJumper: false,
+            }
+          : DEFAULT_PAGINATION
+      }
+      scroll={isMobile ? undefined : { x: 'max-content' }}
       toolBarRender={() =>
         userGroupGuid && canUserGroupsMembership
           ? [
