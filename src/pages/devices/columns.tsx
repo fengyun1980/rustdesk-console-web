@@ -22,11 +22,130 @@ export interface ActionColumnCallbacks {
   canManageGroup: boolean;
 }
 
+interface DeviceActionsProps extends ActionColumnCallbacks {
+  record: API.DeviceItem;
+}
+
+/**
+ * Device row actions. Shared by the desktop table and the mobile card layout
+ * so both keep exactly the same permission rules and confirmation prompts.
+ */
+export const DeviceActions: React.FC<DeviceActionsProps> = ({
+  record,
+  onEdit,
+  onEnable,
+  onDisable,
+  onDelete,
+  onRemoveFromGroup,
+  deviceGroupGuid,
+  canEdit,
+  canStatus,
+  canDelete,
+  canManageGroup,
+}) => {
+  const intl = useIntl();
+  const isDisabled = record.status === 0;
+
+  // When in device group context, only show remove button
+  if (deviceGroupGuid) {
+    if (!canManageGroup) return null;
+    return (
+      <Popconfirm
+        key="remove"
+        title={
+          <FormattedMessage
+            id="pages.devices.removeFromGroupConfirm"
+            defaultMessage="Are you sure to remove this device from the group?"
+          />
+        }
+        onConfirm={() => onRemoveFromGroup(record.id)}
+        okText={intl.formatMessage({
+          id: 'pages.common.confirm',
+          defaultMessage: 'Yes',
+        })}
+        cancelText={intl.formatMessage({
+          id: 'pages.common.cancel',
+          defaultMessage: 'No',
+        })}
+      >
+        <Button variant="link" size="small" danger icon={<DeleteOutlined />}>
+          <FormattedMessage id="pages.devices.remove" defaultMessage="Remove" />
+        </Button>
+      </Popconfirm>
+    );
+  }
+
+  // Normal device list (not in device group context)
+  return (
+    <Space size={0} separator={<Divider orientation="vertical" />}>
+      {canEdit && (
+        <Button
+          key="edit"
+          type="link"
+          size="small"
+          icon={<EditOutlined />}
+          onClick={() => onEdit(record)}
+        >
+          <FormattedMessage id="pages.common.edit" defaultMessage="Edit" />
+        </Button>
+      )}
+      {canStatus && record.status !== 1 && (
+        <Button
+          key="enable"
+          type="link"
+          size="small"
+          icon={<PlusCircleOutlined />}
+          onClick={() => onEnable(record.guid)}
+        >
+          <FormattedMessage id="pages.devices.enable" defaultMessage="Enable" />
+        </Button>
+      )}
+      {canStatus && record.status !== 0 && (
+        <Button
+          key="disable"
+          type="link"
+          size="small"
+          icon={<MinusCircleOutlined />}
+          onClick={() => onDisable(record.guid)}
+        >
+          <FormattedMessage
+            id="pages.devices.disable"
+            defaultMessage="Disable"
+          />
+        </Button>
+      )}
+      {canDelete && (isDisabled || record.status === undefined) && (
+        <Popconfirm
+          key="delete"
+          title={
+            <FormattedMessage
+              id="pages.devices.deleteConfirm"
+              defaultMessage="Are you sure to delete this device?"
+            />
+          }
+          onConfirm={() => onDelete(record.guid)}
+          okText={intl.formatMessage({
+            id: 'pages.common.confirm',
+            defaultMessage: 'Yes',
+          })}
+          cancelText={intl.formatMessage({
+            id: 'pages.common.cancel',
+            defaultMessage: 'No',
+          })}
+        >
+          <Button variant="link" size="small" danger icon={<DeleteOutlined />}>
+            <FormattedMessage id="pages.common.delete" defaultMessage="Delete" />
+          </Button>
+        </Popconfirm>
+      )}
+    </Space>
+  );
+};
+
 export const getActionColumn = (
   callbacks: ActionColumnCallbacks,
   width?: number | string,
 ): ProColumns<API.DeviceItem> => {
-  const intl = useIntl();
   const {
     onEdit,
     onEnable,
@@ -51,122 +170,20 @@ export const getActionColumn = (
       deviceGroupGuid !== undefined
         ? !canManageGroup
         : !canEdit && !canStatus && !canDelete,
-    render: (_: unknown, record: API.DeviceItem) => {
-      const isDisabled = record.status === 0;
-
-      // When in device group context, only show remove button
-      if (deviceGroupGuid) {
-        if (!canManageGroup) return null;
-        return (
-          <Popconfirm
-            key="remove"
-            title={
-              <FormattedMessage
-                id="pages.devices.removeFromGroupConfirm"
-                defaultMessage="Are you sure to remove this device from the group?"
-              />
-            }
-            onConfirm={() => onRemoveFromGroup(record.id)}
-            okText={intl.formatMessage({
-              id: 'pages.common.confirm',
-              defaultMessage: 'Yes',
-            })}
-            cancelText={intl.formatMessage({
-              id: 'pages.common.cancel',
-              defaultMessage: 'No',
-            })}
-          >
-            <Button
-              variant="link"
-              size="small"
-              danger
-              icon={<DeleteOutlined />}
-            >
-              <FormattedMessage
-                id="pages.devices.remove"
-                defaultMessage="Remove"
-              />
-            </Button>
-          </Popconfirm>
-        );
-      }
-
-      // Normal device list (not in device group context)
-      return (
-        <Space size={0} separator={<Divider orientation="vertical" />}>
-          {canEdit && (
-            <Button
-              key="edit"
-              type="link"
-              size="small"
-              icon={<EditOutlined />}
-              onClick={() => onEdit(record)}
-            >
-              <FormattedMessage id="pages.common.edit" defaultMessage="Edit" />
-            </Button>
-          )}
-          {canStatus && record.status !== 1 && (
-            <Button
-              key="enable"
-              type="link"
-              size="small"
-              icon={<PlusCircleOutlined />}
-              onClick={() => onEnable(record.guid)}
-            >
-              <FormattedMessage
-                id="pages.devices.enable"
-                defaultMessage="Enable"
-              />
-            </Button>
-          )}
-          {canStatus && record.status !== 0 && (
-            <Button
-              key="disable"
-              type="link"
-              size="small"
-              icon={<MinusCircleOutlined />}
-              onClick={() => onDisable(record.guid)}
-            >
-              <FormattedMessage
-                id="pages.devices.disable"
-                defaultMessage="Disable"
-              />
-            </Button>
-          )}
-          {canDelete && (isDisabled || record.status === undefined) && (
-            <Popconfirm
-              key="delete"
-              title={
-                <FormattedMessage
-                  id="pages.devices.deleteConfirm"
-                  defaultMessage="Are you sure to delete this device?"
-                />
-              }
-              onConfirm={() => onDelete(record.guid)}
-              okText={intl.formatMessage({
-                id: 'pages.common.confirm',
-                defaultMessage: 'Yes',
-              })}
-              cancelText={intl.formatMessage({
-                id: 'pages.common.cancel',
-                defaultMessage: 'No',
-              })}
-            >
-              <Button
-                variant="link"
-                size="small"
-                danger
-                icon={<DeleteOutlined />}
-              >
-                <FormattedMessage
-                  id="pages.common.delete"
-                  defaultMessage="Delete"
-                />
-              </Button>
-            </Popconfirm>
-          )}
-        </Space>
-      );
-    },
+    render: (_: unknown, record: API.DeviceItem) => (
+      <DeviceActions
+        record={record}
+        onEdit={onEdit}
+        onEnable={onEnable}
+        onDisable={onDisable}
+        onDelete={onDelete}
+        onRemoveFromGroup={onRemoveFromGroup}
+        deviceGroupGuid={deviceGroupGuid}
+        canEdit={canEdit}
+        canStatus={canStatus}
+        canDelete={canDelete}
+        canManageGroup={canManageGroup}
+      />
+    ),
   };
 };

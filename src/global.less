@@ -199,6 +199,174 @@ ol {
   .ant-pro-page-container-children-container,
   .ant-pro-page-container-children-content {
     padding-inline: 12px;
+    padding-block: 8px;
+  }
+
+  // 页头更紧凑，省出竖向空间给内容
+  .ant-page-header {
+    padding-block: 8px 0;
+    padding-inline: 12px;
+  }
+  .ant-page-header-heading-title {
+    font-size: 16px;
+  }
+
+  // 查询表单：单列堆叠 + 紧凑间距，避免字段和按钮之间出现大片空白
+  .ant-pro-table-search,
+  .ant-pro-query-filter {
+    padding: 12px 12px 4px !important;
+
+    .ant-form-item {
+      margin-bottom: 8px;
+    }
+    .ant-form-item-label {
+      padding-bottom: 2px;
+
+      > label {
+        height: auto;
+        font-size: 12px;
+      }
+    }
+    .ant-form-item-control {
+      width: 100%;
+    }
+    .ant-select,
+    .ant-select-selector,
+    .ant-input,
+    .ant-input-affix-wrapper,
+    .ant-picker {
+      width: 100% !important;
+      font-size: 13px;
+    }
+    .ant-form-item-control-input {
+      min-height: 32px;
+    }
+    .ant-pro-form-query-filter-actions,
+    .ant-pro-query-filter-actions {
+      margin-left: auto;
+    }
+  }
+
+  // 表格工具栏紧凑，按钮不抢空间
+  .ant-pro-table-list-toolbar-container {
+    padding-block: 8px;
+
+    .ant-pro-table-list-toolbar-right {
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+    .ant-btn {
+      padding-inline: 8px;
+      font-size: 12px;
+    }
+  }
+
+  // 表格单元格更紧凑，横向滚动时能看到更多内容
+  .ant-table-wrapper .ant-table-thead > tr > th,
+  .ant-table-wrapper .ant-table-tbody > tr > td {
+    padding: 8px;
+    font-size: 12px;
+  }
+
+  // 手机上取消固定列：固定操作列会吃掉大半屏宽，导致只能看到两列
+  .ant-table-wrapper .ant-table-cell-fix-right,
+  .ant-table-wrapper .ant-table-cell-fix-left {
+    position: static !important;
+    box-shadow: none !important;
+  }
+  .ant-table-wrapper .ant-table-cell-fix-right-first::after,
+  .ant-table-wrapper .ant-table-cell-fix-left-last::after {
+    display: none !important;
+  }
+
+  // 卡片内边距收紧
+  .ant-pro-card .ant-pro-card-body {
+    padding: 12px;
+  }
+
+  // 分页允许换行，隐藏每页条数选择，手机上更好点
+  .ant-pagination {
+    flex-wrap: wrap;
+    row-gap: 4px;
+  }
+  .ant-pagination .ant-pagination-options {
+    display: none;
+  }
+
+  // 设备列表：窄屏用卡片布局，不再依赖横向滚动
+  .device-mobile-table {
+    .ant-pro-card-body {
+      padding: 8px;
+    }
+    .ant-table,
+    .ant-table-content,
+    .ant-table-body {
+      overflow: visible;
+      background: transparent;
+    }
+    .ant-table-tbody > tr,
+    .ant-table-tbody > tr > td {
+      padding: 0 !important;
+      border: none !important;
+      background: transparent;
+    }
+    .ant-table-tbody > tr:not(:last-child) > td {
+      padding-bottom: 8px !important;
+    }
+  }
+
+  .device-mobile-card {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 10px 12px;
+    border: 1px solid var(--ant-color-border-secondary, rgba(5, 5, 5, 0.06));
+    border-radius: 10px;
+    background: var(--ant-color-bg-container, #ffffff);
+
+    &__head {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    &__id {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      font-size: 13px;
+    }
+    &__status {
+      flex: none;
+      display: inline-flex;
+      align-items: center;
+    }
+    &__name {
+      font-size: 13px;
+      font-weight: 600;
+      word-break: break-all;
+    }
+    &__meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2px 12px;
+      font-size: 12px;
+      color: var(--ant-color-text-secondary, rgba(0, 0, 0, 0.65));
+      word-break: break-all;
+    }
+    &__note {
+      font-size: 12px;
+      color: var(--ant-color-text-tertiary, rgba(0, 0, 0, 0.45));
+      word-break: break-all;
+    }
+    &__actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      justify-content: flex-end;
+      margin-top: 2px;
+      padding-top: 6px;
+      border-top: 1px dashed var(--ant-color-split, rgba(5, 5, 5, 0.06));
+    }
   }
 }
 

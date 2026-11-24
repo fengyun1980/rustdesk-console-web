@@ -4,6 +4,8 @@ import {
   PlusCircleOutlined,
   MinusCircleOutlined,
   SelectOutlined,
+  CheckCircleOutlined,
+  CloseCircleOutlined,
 } from '@ant-design/icons';
 import {
   batchUpdateDeviceStatus,
@@ -11,14 +13,14 @@ import {
   getAdminDeviceList,
 } from '@/services/rustdesk-console/device';
 import { removeDeviceFromGroup } from '@/services/rustdesk-console/deviceGroup';
-import type { ActionType } from '@ant-design/pro-components';
+import type { ActionType, ProColumns } from '@ant-design/pro-components';
 import { PageContainer, ProTable } from '@ant-design/pro-components';
 import { FormattedMessage, useAccess, useIntl } from '@umijs/max';
-import { App, Button, Popconfirm, Space } from 'antd';
+import { App, Badge, Button, Grid, Popconfirm, Space } from 'antd';
 import dayjs from 'dayjs';
 import React, { useRef, useState } from 'react';
 import { getDeviceColumns } from '@/components/DeviceSelectTable/columns';
-import { getActionColumn } from './columns';
+import { DeviceActions, getActionColumn } from './columns';
 import EditDeviceModal from './components/EditDeviceModal';
 import ImportDevicesModal from './components/ImportDevicesModal';
 import PresenceAlert from './components/PresenceAlert';
@@ -40,6 +42,8 @@ const DeviceList: React.FC<DeviceListProps> = ({
   const intl = useIntl();
   const { message: msgApi, modal } = App.useApp();
   const access = useAccess();
+  const screens = Grid.useBreakpoint();
+  const isMobile = screens.md === false;
   const actionRef = useRef<ActionType>(null);
   const searchParamsRef = useRef<Record<string, unknown>>({});
   const sortParamsRef = useRef<API.DeviceSortParams>({});
@@ -132,12 +136,17 @@ const DeviceList: React.FC<DeviceListProps> = ({
         }),
       );
       actionRef.current?.reload();
-    } catch {
+    } catch (error: any) {
+      // Surface the backend reason (e.g. "Device not found") instead of a bare
+      // HTTP status so a failing delete can be diagnosed from the UI.
+      const detail =
+        error?.response?.data?.message ?? error?.info?.errorMessage;
       msgApi.error(
-        intl.formatMessage({
-          id: 'pages.devices.deleteFailed',
-          defaultMessage: 'Failed to delete device',
-        }),
+        detail ||
+          intl.formatMessage({
+            id: 'pages.devices.deleteFailed',
+            defaultMessage: 'Failed to delete device',
+          }),
       );
     }
   };
@@ -431,26 +440,108 @@ const DeviceList: React.FC<DeviceListProps> = ({
 
   const actionWidth = deviceGroupGuid ? 90 : hasDisabledDevice ? 240 : 170;
 
-  const actionColumn = getActionColumn(
-    {
-      onEdit: (record) => {
-        setEditingRecord(record);
-        setEditModalVisible(true);
-      },
-      onEnable: handleEnable,
-      onDisable: handleDisable,
-      onDelete: handleDelete,
-      onRemoveFromGroup: handleRemoveFromGroup,
-      deviceGroupGuid,
-      canEdit: access.canDevicesEdit,
-      canStatus: access.canDevicesStatus,
-      canDelete: access.canDevicesDelete,
-      canManageGroup: access.isSuperAdmin,
+  const actionCallbacks = {
+    onEdit: (record: API.DeviceItem) => {
+      setEditingRecord(record);
+      setEditModalVisible(true);
     },
-    actionWidth,
-  );
+    onEnable: handleEnable,
+    onDisable: handleDisable,
+    onDelete: handleDelete,
+    onRemoveFromGroup: handleRemoveFromGroup,
+    deviceGroupGuid,
+    canEdit: access.canDevicesEdit,
+    canStatus: access.canDevicesStatus,
+    canDelete: access.canDevicesDelete,
+    canManageGroup: access.isSuperAdmin,
+  };
 
-  const columns = [...filteredColumns, actionColumn];
+  const actionColumn = getActionColumn(actionCallbacks, actionWidth);
+
+  // 窄屏改成卡片列表：把 ID/状态/归属信息纵向堆叠，操作按钮放在卡片底部，
+  // 避免表格横向滚动后只剩“状态/操作”两列可见。
+  const mobileColumns: ProColumns<API.DeviceItem>[] = [
+    {
+      title: 'Device',
+      key: 'mobileCard',
+      render: (_: unknown, record: API.DeviceItem) => {
+        const idRender = baseColumns.find((col) => col.dataIndex === 'id')
+          ?.render as
+          | ((dom: any, entity: any, index: any, action: any, schema: any) => React.ReactNode)
+          | undefined;
+        const showActions =
+          deviceGroupGuid !== undefined
+            ? access.isSuperAdmin
+            : access.canDevicesEdit ||
+              access.canDevicesStatus ||
+              access.canDevicesDelete;
+        const deviceName =
+          record.info?.username && record.info?.device_name
+            ? `${record.info.username}@${record.info.device_name}`
+            : record.info?.device_name || record.info?.username || '-';
+        const infoLine = [record.info?.ip, record.info?.version]
+          .filter(Boolean)
+          .join(' · ');
+        return (
+          <div className="device-mobile-card">
+            <div className="device-mobile-card__head">
+              <span className="device-mobile-card__id">
+                {idRender
+                  ? idRender(record.id, record, 0, {}, {})
+                  : record.id || '-'}
+              </span>
+              <span className="device-mobile-card__status">
+                {record.status === 1 ? (
+                  <CheckCircleOutlined style={{ color: '#52c41a' }} />
+                ) : record.status === 0 ? (
+                  <CloseCircleOutlined style={{ color: '#f5222d' }} />
+                ) : null}
+              </span>
+            </div>
+            <div className="device-mobile-card__name">{deviceName}</div>
+            <div className="device-mobile-card__meta">
+              <span>
+                <FormattedMessage
+                  id="pages.devices.user"
+                  defaultMessage="User"
+                />
+                : {record.user_name || '-'}
+              </span>
+              <span>
+                <FormattedMessage
+                  id="pages.devices.deviceGroup"
+                  defaultMessage="Group"
+                />
+                : {record.device_group_name || '-'}
+              </span>
+              <span>
+                <FormattedMessage
+                  id="pages.devices.strategy"
+                  defaultMessage="Strategy"
+                />
+                : {record.strategy_name || '-'}
+              </span>
+            </div>
+            {infoLine && (
+              <div className="device-mobile-card__meta">{infoLine}</div>
+            )}
+            {record.note && (
+              <div className="device-mobile-card__note">{record.note}</div>
+            )}
+            {showActions && (
+              <div className="device-mobile-card__actions">
+                <DeviceActions record={record} {...actionCallbacks} />
+              </div>
+            )}
+          </div>
+        );
+      },
+    },
+  ];
+
+  const columns = isMobile
+    ? mobileColumns
+    : [...filteredColumns, actionColumn];
 
   return (
     <PageContainer
@@ -466,6 +557,8 @@ const DeviceList: React.FC<DeviceListProps> = ({
     >
       <PresenceAlert diagnostics={presenceDiagnostics} />
       <ProTable<API.DeviceItem>
+        className={isMobile ? 'device-mobile-table' : undefined}
+        showHeader={!isMobile}
         headerTitle={
           <FormattedMessage
             id="pages.devices.list"
@@ -479,16 +572,18 @@ const DeviceList: React.FC<DeviceListProps> = ({
         actionRef={actionRef}
         rowKey="guid"
         rowSelection={
-          (deviceGroupGuid && access.isSuperAdmin) ||
-          (!deviceGroupGuid && access.canDevicesStatus)
-            ? {
-                selectedRowKeys,
-                onChange: (keys, rows) => {
-                  setSelectedRowKeys(keys);
-                  setSelectedRows(rows);
-                },
-              }
-            : undefined
+          isMobile
+            ? undefined
+            : (deviceGroupGuid && access.isSuperAdmin) ||
+                (!deviceGroupGuid && access.canDevicesStatus)
+              ? {
+                  selectedRowKeys,
+                  onChange: (keys, rows) => {
+                    setSelectedRowKeys(keys);
+                    setSelectedRows(rows);
+                  },
+                }
+              : undefined
         }
         tableAlertOptionRender={() => (
           <Space size={16}>
@@ -612,8 +707,17 @@ const DeviceList: React.FC<DeviceListProps> = ({
           return tableResult;
         }}
         columns={columns}
-        pagination={DEFAULT_PAGINATION}
-        scroll={{ x: 'max-content' }}
+        pagination={
+          isMobile
+            ? {
+                ...DEFAULT_PAGINATION,
+                simple: true,
+                showSizeChanger: false,
+                showQuickJumper: false,
+              }
+            : DEFAULT_PAGINATION
+        }
+        scroll={isMobile ? undefined : { x: 'max-content' }}
         toolBarRender={() => {
           const buttons: React.ReactNode[] = [];
           if (!deviceGroupGuid) {
@@ -646,14 +750,23 @@ const DeviceList: React.FC<DeviceListProps> = ({
           }
           return buttons;
         }}
-        options={{
-          density: true,
-          setting: {
-            listsHeight: 400,
-          },
-          fullScreen: false,
-          reload: true,
-        }}
+        options={
+          isMobile
+            ? {
+                density: false,
+                setting: false,
+                fullScreen: false,
+                reload: true,
+              }
+            : {
+                density: true,
+                setting: {
+                  listsHeight: 400,
+                },
+                fullScreen: false,
+                reload: true,
+              }
+        }
       />
 
       {deviceGroupGuid && (
