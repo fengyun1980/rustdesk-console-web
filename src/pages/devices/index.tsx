@@ -464,6 +464,7 @@ const DeviceList: React.FC<DeviceListProps> = ({
     {
       title: 'Device',
       key: 'mobileCard',
+      search: false,
       render: (_: unknown, record: API.DeviceItem) => {
         const idRender = baseColumns.find((col) => col.dataIndex === 'id')
           ?.render as
@@ -540,8 +541,21 @@ const DeviceList: React.FC<DeviceListProps> = ({
   ];
 
   const columns = isMobile
-    ? mobileColumns
-    : [...filteredColumns, actionColumn];
+    ? [
+        // 保留原列定义给查询表单使用，表格里只渲染卡片列
+        ...filteredColumns.map(
+          (col): ProColumns<API.DeviceItem> => ({ ...col, hideInTable: true }),
+        ),
+        { ...actionColumn, hideInTable: true },
+        ...mobileColumns,
+      ]
+    : [
+        ...filteredColumns,
+        actionColumn,
+        ...mobileColumns.map(
+          (col): ProColumns<API.DeviceItem> => ({ ...col, hideInTable: true }),
+        ),
+      ];
 
   return (
     <PageContainer
