@@ -117,7 +117,8 @@ const CustomClientPage: React.FC = () => {
       buildListActionRef.current?.reload();
     } catch (error: any) {
       msgApi.error(
-        error?.data?.message ||
+        error?.response?.data?.message ||
+          error?.data?.message ||
           intl.formatMessage({
             id: 'pages.customClient.generateFailed',
             defaultMessage: 'Failed to submit build request',
@@ -151,7 +152,8 @@ const CustomClientPage: React.FC = () => {
       buildListActionRef.current?.reload();
     } catch (error: any) {
       msgApi.error(
-        error?.data?.message ||
+        error?.response?.data?.message ||
+          error?.data?.message ||
           intl.formatMessage({
             id: 'pages.customClient.retryBuildFailed',
             defaultMessage: 'Failed to retry build',
