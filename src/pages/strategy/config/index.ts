@@ -45,9 +45,8 @@ export function getOptionsByCategory(category: string): ConfigOption[] {
 }
 
 export function getStrategyOptionsByCategory(category: string): ConfigOption[] {
-  return configOptions.filter(
-    (opt) => opt.category === category && opt.strategySupported === true,
-  );
+  // 策略管理与自定义客户端保持一致，展示同一套配置项
+  return configOptions.filter((opt) => opt.category === category);
 }
 
 export function getStrategyCategories(): ConfigCategory[] {
