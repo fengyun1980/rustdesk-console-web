@@ -44,6 +44,24 @@ const StrategyColumns = (
     },
     {
       title: (
+        <FormattedMessage
+          id="pages.strategies.rustdeskVersion"
+          defaultMessage="RustDesk Version"
+        />
+      ),
+      dataIndex: 'rustdesk_version',
+      width: 150,
+      search: false,
+      render: (_, record) =>
+        record.rustdesk_version || (
+          <FormattedMessage
+            id="pages.strategies.rustdeskVersionAll"
+            defaultMessage="All versions"
+          />
+        ),
+    },
+    {
+      title: (
         <FormattedMessage id="pages.strategies.note" defaultMessage="Note" />
       ),
       dataIndex: 'note',

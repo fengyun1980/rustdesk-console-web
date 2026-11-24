@@ -849,6 +849,7 @@ declare namespace API {
     name: string;
     note?: string;
     config_options?: Record<string, string>;
+    rustdesk_version?: string | null;
     updated_at?: string;
   };
 
@@ -856,12 +857,14 @@ declare namespace API {
     name: string;
     note?: string;
     config_options?: Record<string, string>;
+    rustdesk_version?: string;
   };
 
   type UpdateStrategyParams = {
     name?: string;
     note?: string;
     config_options?: Record<string, string>;
+    rustdesk_version?: string;
   };
 
   type StrategyAssignParams = {

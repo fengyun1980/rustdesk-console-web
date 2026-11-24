@@ -1,7 +1,8 @@
 import { ModalForm } from '@ant-design/pro-components';
 import { FormattedMessage, useIntl } from '@umijs/max';
-import { Divider, Form, Input } from 'antd';
-import React, { useEffect, useState } from 'react';
+import { AutoComplete, Divider, Form, Input } from 'antd';
+import React, { useEffect, useMemo, useState } from 'react';
+import { getRustdeskReleases } from '@/services/rustdesk-console/custom-client';
 import ConfigOptionsForm from './ConfigOptionsForm';
 
 interface StrategyFormProps {
@@ -28,6 +29,9 @@ const StrategyForm: React.FC<StrategyFormProps> = ({
   const [configOptions, setConfigOptions] = useState<Record<string, string>>(
     {},
   );
+  const [releases, setReleases] = useState<API.RustdeskRelease[]>([]);
+  const rustdeskVersion = Form.useWatch('rustdesk_version', form) as
+    string | undefined;
 
   useEffect(() => {
     if (open) {
@@ -35,6 +39,7 @@ const StrategyForm: React.FC<StrategyFormProps> = ({
         form.setFieldsValue({
           name: currentRecord.name,
           note: currentRecord.note || '',
+          rustdesk_version: currentRecord.rustdesk_version || undefined,
         });
         setConfigOptions(currentRecord.config_options || {});
       } else {
@@ -43,6 +48,30 @@ const StrategyForm: React.FC<StrategyFormProps> = ({
       }
     }
   }, [isEdit, isView, open, currentRecord, form]);
+
+  useEffect(() => {
+    if (!open) return;
+    getRustdeskReleases()
+      .then((list) => setReleases(Array.isArray(list) ? list : []))
+      .catch(() => setReleases([]));
+  }, [open]);
+
+  const versionOptions = useMemo(
+    () =>
+      releases.map((release) => ({
+        label: release.prerelease
+          ? intl.formatMessage(
+              {
+                id: 'pages.strategies.betaTag',
+                defaultMessage: '{tag} (beta)',
+              },
+              { tag: release.tag },
+            )
+          : release.tag,
+        value: release.tag,
+      })),
+    [releases, intl],
+  );
 
   const handleFinish = async () => {
     if (!onFinish) return false;
@@ -53,6 +82,7 @@ const StrategyForm: React.FC<StrategyFormProps> = ({
         note: values.note || undefined,
         config_options:
           Object.keys(configOptions).length > 0 ? configOptions : undefined,
+        rustdesk_version: values.rustdesk_version || undefined,
       };
       return await onFinish(submitData);
     } catch {
@@ -135,6 +165,36 @@ const StrategyForm: React.FC<StrategyFormProps> = ({
         />
       </Form.Item>
 
+      <Form.Item
+        name="rustdesk_version"
+        label={
+          <FormattedMessage
+            id="pages.strategies.rustdeskVersion"
+            defaultMessage="RustDesk Version"
+          />
+        }
+        extra={intl.formatMessage({
+          id: 'pages.strategies.rustdeskVersionHint',
+          defaultMessage:
+            'Leave empty to apply to all versions. Pick a version to hide options it does not support.',
+        })}
+      >
+        <AutoComplete
+          disabled={isView}
+          allowClear
+          options={versionOptions}
+          placeholder={intl.formatMessage({
+            id: 'pages.strategies.rustdeskVersionAll',
+            defaultMessage: 'All versions',
+          })}
+          filterOption={(input, option) =>
+            String(option?.value ?? '')
+              .toLowerCase()
+              .includes(input.toLowerCase())
+          }
+        />
+      </Form.Item>
+
       <Divider titlePlacement="left" style={{ fontSize: 14 }}>
         <FormattedMessage
           id="pages.strategies.configOptions"
@@ -146,6 +206,7 @@ const StrategyForm: React.FC<StrategyFormProps> = ({
         value={configOptions}
         onChange={setConfigOptions}
         disabled={isView}
+        version={rustdeskVersion}
       />
     </ModalForm>
   );

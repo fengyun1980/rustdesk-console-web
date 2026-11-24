@@ -2,6 +2,14 @@ export default {
   'pages.strategies.list': '策略列表',
   'pages.strategies.name': '策略名称',
   'pages.strategies.note': '备注',
+  'pages.strategies.rustdeskVersion': 'RustDesk 版本',
+  'pages.strategies.rustdeskVersionAll': '全部版本',
+  'pages.strategies.rustdeskVersionHint':
+    '留空表示适用于全部版本；选择版本后仅显示该版本支持的配置项。',
+  'pages.strategies.versionFilterHint':
+    '仅显示 RustDesk {version} 支持的配置项。',
+  'pages.strategies.noSupportedOptions': '该版本没有可配置的选项。',
+  'pages.strategies.betaTag': '{tag}（测试版）',
   'pages.strategies.create': '创建策略',
   'pages.strategies.edit': '编辑策略',
   'pages.strategies.view': '查看策略',

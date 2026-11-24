@@ -2,6 +2,15 @@ export default {
   'pages.strategies.list': 'Strategy List',
   'pages.strategies.name': 'Strategy Name',
   'pages.strategies.note': 'Note',
+  'pages.strategies.rustdeskVersion': 'RustDesk Version',
+  'pages.strategies.rustdeskVersionAll': 'All versions',
+  'pages.strategies.rustdeskVersionHint':
+    'Leave empty to apply to all versions. Pick a version to hide options it does not support.',
+  'pages.strategies.versionFilterHint':
+    'Showing only options supported by RustDesk {version}.',
+  'pages.strategies.noSupportedOptions':
+    'No configurable options are supported by this version.',
+  'pages.strategies.betaTag': '{tag} (beta)',
   'pages.strategies.create': 'Create Strategy',
   'pages.strategies.edit': 'Edit Strategy',
   'pages.strategies.view': 'View Strategy',

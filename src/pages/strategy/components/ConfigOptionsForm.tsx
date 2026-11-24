@@ -21,11 +21,13 @@ import {
   getStrategyCategories,
   getStrategyOptionsByCategory,
 } from '../configOptions';
+import { isOptionSupported } from '../config/versionSupport';
 
 interface ConfigOptionsFormProps {
   value?: Record<string, string>;
   onChange?: (value: Record<string, string>) => void;
   disabled?: boolean;
+  version?: string | null;
 }
 
 const ConfigOptionControl: React.FC<{
@@ -240,6 +242,7 @@ const ConfigOptionsForm: React.FC<ConfigOptionsFormProps> = ({
   value = {},
   onChange,
   disabled = false,
+  version,
 }) => {
   const intl = useIntl();
   const [localValue, setLocalValue] = useState<Record<string, string>>({
@@ -272,43 +275,60 @@ const ConfigOptionsForm: React.FC<ConfigOptionsFormProps> = ({
   const modifiedCount = Object.keys(localValue).filter((key) => {
     const opt = configOptionsMap[key];
     if (!opt) return true;
+    if (!isOptionSupported(key, version)) return false;
     return localValue[key] !== opt.defaultValue;
   }).length;
 
   const strategyCategories = getStrategyCategories();
-  const tabItems = strategyCategories.map((cat) => {
-    const options = getStrategyOptionsByCategory(cat.key);
-    return {
-      key: cat.key,
-      label: (
-        <span>
-          {intl.formatMessage({
-            id: `pages.strategies.category.${cat.key}`,
-            defaultMessage: cat.label,
-          })}
-          <span style={{ color: '#999', fontSize: 12, marginLeft: 4 }}>
-            ({options.length})
+  const tabItems = strategyCategories
+    .map((cat) => {
+      const options = getStrategyOptionsByCategory(cat.key).filter((opt) =>
+        isOptionSupported(opt.key, version),
+      );
+      return { cat, options };
+    })
+    .filter(({ options }) => options.length > 0)
+    .map(({ cat, options }) => {
+      return {
+        key: cat.key,
+        label: (
+          <span>
+            {intl.formatMessage({
+              id: `pages.strategies.category.${cat.key}`,
+              defaultMessage: cat.label,
+            })}
+            <span style={{ color: '#999', fontSize: 12, marginLeft: 4 }}>
+              ({options.length})
+            </span>
           </span>
-        </span>
-      ),
-      children: (
-        <div>
-          {options.map((opt) => (
-            <ConfigOptionControl
-              key={opt.key}
-              option={opt}
-              value={localValue[opt.key]}
-              disabled={disabled}
-              onChange={(val) => handleChange(opt.key, val)}
-            />
-          ))}
-        </div>
-      ),
-    };
-  });
+        ),
+        children: (
+          <div>
+            {options.map((opt) => (
+              <ConfigOptionControl
+                key={opt.key}
+                option={opt}
+                value={localValue[opt.key]}
+                disabled={disabled}
+                onChange={(val) => handleChange(opt.key, val)}
+              />
+            ))}
+          </div>
+        ),
+      };
+    });
 
   return (
     <div>
+      {version && (
+        <div style={{ color: '#1677ff', fontSize: 12, marginBottom: 8 }}>
+          <FormattedMessage
+            id="pages.strategies.versionFilterHint"
+            defaultMessage="Showing only options supported by RustDesk {version}."
+            values={{ version }}
+          />
+        </div>
+      )}
       <div
         style={{
           display: 'flex',
@@ -333,7 +353,16 @@ const ConfigOptionsForm: React.FC<ConfigOptionsFormProps> = ({
           </Button>
         )}
       </div>
-      <Tabs items={tabItems} size="small" />
+      {tabItems.length > 0 ? (
+        <Tabs items={tabItems} size="small" />
+      ) : (
+        <div style={{ color: '#999', fontSize: 13 }}>
+          <FormattedMessage
+            id="pages.strategies.noSupportedOptions"
+            defaultMessage="No configurable options are supported by this version."
+          />
+        </div>
+      )}
     </div>
   );
 };
