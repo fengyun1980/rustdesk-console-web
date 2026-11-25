@@ -3,6 +3,7 @@ import { Helmet, history, useIntl } from '@umijs/max';
 import { App, Button, Form, Input, Spin, Typography } from 'antd';
 import React, { useCallback, useEffect, useState } from 'react';
 import { createStyles } from 'antd-style';
+import loginBg from '@/assets/login-bg.png';
 import { Footer } from '@/components';
 import {
   confirmPasswordReset,
@@ -17,8 +18,7 @@ const useStyles = createStyles(({ token }) => ({
     flexDirection: 'column',
     minHeight: '100vh',
     overflow: 'auto',
-    backgroundImage:
-      "url('https://mdn.alipayobjects.com/yuyan_qk0oxh/afts/img/V-_oS6r-i7wAAAAAAAAAAAAAFl94AQBr')",
+    backgroundImage: `url('${loginBg}')`,
     backgroundSize: '100% 100%',
   },
   card: {

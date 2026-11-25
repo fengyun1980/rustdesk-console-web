@@ -513,7 +513,8 @@ export default function WebClientPage() {
                 : undefined,
             );
           } else if (message.type === 'error' || message.type === 'warning') {
-            console.error('[web-client] session error:', message.code);
+            // 连接失败原因已在页面内提示用户，控制台只保留 warn 级别记录。
+            console.warn('[web-client] session error:', message.code);
             if (
               message.code === 'authorization' ||
               message.code === 'sessionExpired'

@@ -786,7 +786,8 @@ export class RemoteSession {
 
       // 诊断用：把底层异常打到控制台，便于判断对端在哪个环节不兼容。
       // 不携带收到的数据包、凭据或原始服务端消息。
-      console.error(
+      // 用户可见的失败原因已由页面提示，这里用 debug 级别避免刷红色报错。
+      console.debug(
         '[web-client] session failed:',
         error instanceof SessionError ? error.code : 'protocol',
         error,
